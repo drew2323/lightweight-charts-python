@@ -176,7 +176,8 @@ class Window:
         sync_id: Optional[str] = None,
         scale_candles_only: bool = False,
         sync_crosshairs_only: bool = False,
-        toolbox: bool = False
+        toolbox: bool = False,
+        leftScale: bool = False
     ) -> 'AbstractChart':
         subchart = AbstractChart(
             self,
@@ -184,7 +185,8 @@ class Window:
             height,
             scale_candles_only,
             toolbox,
-            position=position
+            position=position,
+            leftScale=leftScale
         )
         if not sync_id:
             return subchart
@@ -1046,7 +1048,7 @@ class AbstractChart(Candlestick, Pane):
     def create_subchart(self, position: FLOAT = 'left', width: float = 0.5, height: float = 0.5,
                         sync: Optional[Union[str, bool]] = None, scale_candles_only: bool = False,
                         sync_crosshairs_only: bool = False,
-                        toolbox: bool = False) -> 'AbstractChart':
+                        toolbox: bool = False, leftScale: bool = False) -> 'AbstractChart':
         if sync is True:
             sync = self.id
         args = locals()
