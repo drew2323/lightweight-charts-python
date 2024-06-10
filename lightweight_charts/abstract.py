@@ -87,7 +87,7 @@ def get_next_color():
     color_index = (color_index + 1) % len(COLORS)
     return hex_to_rgba(color)
 
-def hex_to_rgba(hex_color, alpha=0.8):
+def hex_to_rgba(hex_color, alpha=0.5):
     hex_color = hex_color.lstrip('#')
     r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
     return f'rgba({r}, {g}, {b}, {alpha})'
