@@ -134,6 +134,9 @@ export class Handler {
             rightPriceScale: {
                 scaleMargins: {top: 0.3, bottom: 0.25},
             },
+            leftPriceScale: {
+                visible:true,
+                scaleMargins:{top:.3,bottom:.25}},
             timeScale: {timeVisible: true, secondsVisible: false},
             crosshair: {
                 mode: CrosshairMode.Normal,

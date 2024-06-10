@@ -5,7 +5,8 @@ from base64 import b64decode
 from datetime import datetime
 from typing import Callable, Union, Literal, List, Optional
 import pandas as pd
-
+import random
+from vectorbtpro.indicators import IndicatorFactory 
 from .table import Table
 from .toolbox import ToolBox
 from .drawings import Box, HorizontalLine, RayLine, TrendLine, TwoPointDrawing, VerticalLine, VerticalSpan
@@ -19,6 +20,77 @@ from .util import (
 current_dir = os.path.dirname(os.path.abspath(__file__))
 INDEX = os.path.join(current_dir, 'js', 'index.html')
 
+def is_indicator(variable):
+    # Get the module path of the variable's type
+    module_path = variable.__class__.__module__
+    # Check if it starts with 'vectorbtpro.indicators'
+    return module_path.startswith('vectorbtpro.indicators')
+
+# # Predefined colors that stand out well on dark backgrounds
+# COLORS = [
+#     'rgba(255, 0, 0, 0.6)',      # Red
+#     'rgba(0, 255, 0, 0.6)',      # Green
+#     'rgba(0, 0, 255, 0.6)',      # Blue
+#     'rgba(255, 255, 0, 0.6)',    # Yellow
+#     'rgba(255, 165, 0, 0.6)',    # Orange
+#     'rgba(75, 0, 130, 0.6)',     # Indigo
+#     'rgba(238, 130, 238, 0.6)',  # Violet
+#     'rgba(0, 255, 255, 0.6)',    # Cyan
+#     'rgba(255, 192, 203, 0.6)',  # Pink
+#     'rgba(0, 128, 128, 0.6)',    # Teal
+#     'rgba(128, 0, 128, 0.6)',    # Purple
+#     'rgba(255, 215, 0, 0.6)',    # Gold
+#     'rgba(173, 255, 47, 0.6)',   # Green Yellow
+# ]
+
+# def get_next_color():
+#     return random.choice(COLORS)
+
+# Predefined pool of colors
+COLORS = [
+    "#63AA57", "#8F8AB0", "#4CAA4E", "#E24AEE", "#D06AA6", "#7891BA", "#A39A34", "#8A94A2", "#61BB2F",
+    "#FD569D", "#1EB6E1", "#379AC9", "#FD6F2E", "#8C9858", "#39A4A3", "#6D97F4", "#1ECB01", "#FA5B16", "#A6891C",
+    "#48CF10", "#D27B26", "#D56B55", "#FE3AB8", "#E35C51", "#EC4FE6", "#E250A3", "#BA618E", "#1BC074", "#C57784",
+    "#888BC5", "#4FA452", "#80885C", "#B97272", "#33BF98", "#B7961D", "#A07284", "#02E54E", "#AF7F35", "#F852EF",
+    "#6D955B", "#E0676E", "#F73DEC", "#CE53FD", "#9773D3", "#649E81", "#D062CE", "#AB73E7", "#A4729C", "#E76A07",
+    "#E85CCB", "#A16FB1", "#4BB859", "#B25EE2", "#8580CE", "#A275EF", "#AC9245", "#4D988D", "#B672C9", "#4CA96E",
+    "#C9873E", "#5BB147", "#10C783", "#D7647D", "#CB893A", "#A586BA", "#28C0A2", "#61A755", "#0EB7C5", "#2DADBC",
+    "#17BB71", "#2BC733", "#2BB890", "#F04EF8", "#699580", "#A88809", "#EB3FF6", "#A75ED3", "#859171", "#BB6285",
+    "#81A147", "#AD7CD2", "#65B630", "#C9616C", "#BD5EFA", "#7A9F30", "#2AB6AB", "#FC496A", "#687FC7", "#DB40E7",
+    "#07BCE9", "#509F63", "#EC4FDD", "#A079BE", "#C17297", "#E447C2", "#E95AD9", "#9FA01E", "#7E86CF", "#21E316",
+    "#1CABF9", "#17C24F", "#9C9254", "#C97994", "#4BA9DA", "#0DD595", "#13BEA8", "#C2855D", "#DF6C13", "#60B370",
+    "#0FC3F6", "#C1830E", "#3AC917", "#0EBBB0", "#CC50B4", "#B768EC", "#D47F49", "#B47BC5", "#38ADBD", "#05DC53",
+    "#44CD4E", "#838E65", "#49D70F", "#2DADBE", "#2CB0C9", "#DA703E", "#06B5CA", "#7BAF3E", "#918E79", "#2AA5E5",
+    "#C37F5E", "#07B8C9", "#4CBA27", "#E752C6", "#7F93B2", "#4798CD", "#45AA4C", "#4DB666", "#7683A7", "#758685",
+    "#4B9FAD", "#9280FD", "#6682DD", "#42ACBE", "#C1609F", "#D850DB", "#649A62", "#54CC22", "#AD81C1", "#BF7A43",
+    "#0FCEA5", "#D06DAF", "#87799B", "#4DA94E", "#2FD654", "#07D587", "#21CF0C", "#03CF34", "#42C771", "#D563CD",
+    "#6D9E9A", "#C76C59", "#68B368", "#11BCE5", "#0DCFB3", "#9266D8", "#BF67F6", "#88A04E", "#73BE17", "#67B437",
+    "#8586E4", "#9F8749", "#479CA5", "#CC777E", "#4FAF46", "#9D9836", "#918DAF", "#D167B8", "#6F9DA5", "#2BB167",
+    "#16B8BC", "#B4861F", "#A08487", "#67B357", "#5CAA5C", "#20CA49", "#D18813", "#15D63F", "#C8618F", "#887E92",
+    "#21C457", "#4EA8CE", "#53BE49", "#5A86D5", "#BD7E4E", "#27B0A1", "#33CF42", "#709083", "#38A8DE", "#4CA762",
+    "#1EA4FF", "#DE3EE4", "#70A860", "#39A3C8", "#6BBB39", "#F053F4", "#8C7FB5", "#969F21", "#B19841", "#E57148",
+    "#C25DA7", "#6DA979", "#B27D73", "#7F9786", "#41AC99", "#C58848", "#948F9E", "#6BB620", "#81AB3B", "#09DE44",
+    "#43A9D2", "#41B0D7", "#20ACAA", "#649FCB", "#CD8345", "#A88669", "#3EA5E7", "#F36A19", "#E06B48", "#8388BD",
+    "#EC6153", "#639082", "#52CA32", "#878BAA", "#02BCDB", "#828FD9", "#3DC07F", "#29D46A", "#9C7CC1", "#EB7713",
+    "#F95F6A", "#E25F4C", "#589994", "#D45AB7", "#DE66AB", "#B8715F", "#E850F4", "#FB6420", "#C2832C", "#6383C5",
+    "#D57A58", "#EF652C", "#02D71A", "#ED664D", "#60A526"
+]
+
+# Iterator to keep track of the current color index
+color_index = 0
+
+def get_next_color():
+    global color_index
+    # Get the next color from the list
+    color = COLORS[color_index]
+    # Convert the color from HEX to RGBA format
+    color_index = (color_index + 1) % len(COLORS)
+    return hex_to_rgba(color)
+
+def hex_to_rgba(hex_color, alpha=0.8):
+    hex_color = hex_color.lstrip('#')
+    r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+    return f'rgba({r}, {g}, {b}, {alpha})'
 
 class Window:
     _id_gen = IDGen()
@@ -218,11 +290,16 @@ class SeriesCommon(Pane):
         arg = self._interval * (arg.timestamp() // self._interval)+self.offset
         return arg
 
-    def set(self, df: Optional[pd.DataFrame] = None, format_cols: bool = True):
-        if df is None or df.empty:
+    def set(self, df: Optional[Union[pd.DataFrame, pd.Series]] = None, format_cols: bool = True):
+        if df is None or (isinstance(df, pd.DataFrame) and df.empty):
             self.run_script(f'{self.id}.series.setData([])')
             self.data = pd.DataFrame()
             return
+        if is_indicator(df):
+            df = df.real
+        #if df is pd.Series then convert to df
+        if isinstance(df, pd.Series):
+            df = df.to_frame(name=self.name)
         if format_cols:
             df = self._df_datetime_format(df, exclude_lowercase=self.name)
         if self.name:
@@ -424,12 +501,14 @@ class SeriesCommon(Pane):
 
 
 class Line(SeriesCommon):
-    def __init__(self, chart, name, color, style, width, price_line, price_label, crosshair_marker=True):
+    def __init__(self, chart, name, color, style, width, price_line, price_label, crosshair_marker=True, priceScaleId="right"):
 
         super().__init__(chart, name)
         self.color = color
 
-        self.run_script(f'''
+        #priceScaleId_line = f"priceScaleId: '{priceScaleId}'," if priceScaleId is not None else ''
+
+        script = f'''
             {self.id} = {self._chart.id}.createLineSeries(
                 "{name}",
                 {{
@@ -437,6 +516,7 @@ class Line(SeriesCommon):
                     lineStyle: {as_enum(style, LINE_STYLE)},
                     lineWidth: {width},
                     lastValueVisible: {jbool(price_label)},
+                    priceScaleId: '{priceScaleId}',
                     priceLineVisible: {jbool(price_line)},
                     crosshairMarkerVisible: {jbool(crosshair_marker)},
                     {"""autoscaleInfoProvider: () => ({
@@ -448,7 +528,11 @@ class Line(SeriesCommon):
                     """ if chart._scale_candles_only else ''}
                 }}
             )
-        null''')
+        null'''
+
+        #print(script)
+
+        self.run_script(script)
 
     # def _set_trend(self, start_time, start_value, end_time, end_value, ray=False, round=False):
     #     if round:
@@ -464,6 +548,12 @@ class Line(SeriesCommon):
     #                             {self._chart.id}, {jbool(ray)}))
     #     {self._chart.id}.chart.timeScale().applyOptions({{shiftVisibleRangeOnNewBar: true}})
     #     ''')
+
+    def scale(self, scale_margin_top: float = 0.0, scale_margin_bottom: float = 0.0):
+        self.run_script(f'''
+        {self.id}.series.priceScale().applyOptions({{
+            scaleMargins: {{top: {scale_margin_top}, bottom: {scale_margin_bottom}}}
+        }})''')
 
     def delete(self):
         """
@@ -719,24 +809,28 @@ class AbstractChart(Candlestick, Pane):
         self.run_script(f'{self.id}.chart.timeScale().fitContent()')
 
     def create_line(
-            self, name: str = '', color: str = 'rgba(214, 237, 255, 0.6)',
+            self, name: str = '', color: str = None,
             style: LINE_STYLE = 'solid', width: int = 2,
-            price_line: bool = True, price_label: bool = True
+            price_line: bool = False, price_label: bool = False, priceScaleId: str = "right"
     ) -> Line:
         """
         Creates and returns a Line object.
         """
-        self._lines.append(Line(self, name, color, style, width, price_line, price_label))
+        if color is None:
+            color = get_next_color()
+        self._lines.append(Line(self, name, color, style, width, price_line, price_label, True, priceScaleId))
         return self._lines[-1]
 
     def create_histogram(
-            self, name: str = '', color: str = 'rgba(214, 237, 255, 0.6)',
-            price_line: bool = True, price_label: bool = True,
+            self, name: str = '', color: str = None,
+            price_line: bool = False, price_label: bool = True,
             scale_margin_top: float = 0.0, scale_margin_bottom: float = 0.0
     ) -> Histogram:
         """
         Creates and returns a Histogram object.
         """
+        if color is None:
+            color = get_next_color()
         return Histogram(
             self, name, color, price_line, price_label,
             scale_margin_top, scale_margin_bottom)
