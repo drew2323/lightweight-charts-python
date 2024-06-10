@@ -1,5 +1,13 @@
-<div align="center">
+Fork of lightweight-charts with enhancements and supporting proprietary workflow
+* colored legends
+* self picking colors
+* support for left price scale
+* support from pd series as input to set()
+* support for vbt indicators for set() (extracting real values series from that)
 
+
+<div align="center">
+    
 # lightweight-charts-python
 
 [![PyPi Release](https://img.shields.io/pypi/v/lightweight-charts?color=32a852&label=PyPi)](https://pypi.org/project/lightweight-charts/)
