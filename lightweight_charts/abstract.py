@@ -325,6 +325,40 @@ class SeriesCommon(Pane):
     def _update_markers(self):
         self.run_script(f'{self.id}.series.setMarkers({json.dumps(list(self.markers.values()))})')
 
+    def markers_set(self, markers_series: pd.Series,
+                    position: MARKER_POSITION = 'below',
+                    shape: MARKER_SHAPE = 'arrow_up',
+                    color: str = '#2196F3',text: str = ''):
+        """
+        Creates multiple markers from pd series.
+        :param markers: A pandas Series with DateTimeIndex and boolean values.
+                        The index should be DateTimeIndex and values should be True/False.
+        :return: a list of marker ids.
+
+        It refreshes the markers, deleting the current.
+        """
+        if not isinstance(markers_series, pd.Series):
+            #raise exception
+            raise TypeError('Markers must be a pd.Series')
+        series = self._series_datetime_format(markers_series, exclude_lowercase=self.name)
+        marker_ids = []
+        self.markers = {}
+        for timestamp, value in series.iteritems():
+            if value:
+                marker_id = self.win._id_gen.generate()
+                self.markers[marker_id] = {
+                    "time": timestamp,
+                    "position": marker_position(position),  # Default position
+                    "color": color,   # Default color
+                    "shape": marker_shape(shape),    # Default shape
+                    "text": text,           # Default text
+                }
+                marker_ids.append(marker_id)
+        
+        self._update_markers()
+        return marker_ids
+
+
     def marker_list(self, markers: list):
         """
         Creates multiple markers.\n
