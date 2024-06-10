@@ -781,7 +781,7 @@ class Candlestick(SeriesCommon):
 class AbstractChart(Candlestick, Pane):
     def __init__(self, window: Window, width: float = 1.0, height: float = 1.0,
                  scale_candles_only: bool = False, toolbox: bool = False,
-                 autosize: bool = True, position: FLOAT = 'left'):
+                 autosize: bool = True, position: FLOAT = 'left', leftScale: bool = False):
         Pane.__init__(self, window)
 
         self._lines = []
@@ -794,7 +794,7 @@ class AbstractChart(Candlestick, Pane):
         self.polygon: PolygonAPI = PolygonAPI(self)
 
         self.run_script(
-            f'{self.id} = new Lib.Handler("{self.id}", {width}, {height}, "{position}", {jbool(autosize)})')
+            f'{self.id} = new Lib.Handler("{self.id}", {width}, {height}, "{position}", {jbool(autosize)}, {jbool(leftScale)})')
 
         Candlestick.__init__(self, self)
 

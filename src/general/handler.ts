@@ -58,7 +58,8 @@ export class Handler {
         innerWidth: number,
         innerHeight: number,
         position: string,
-        autoSize: boolean
+        autoSize: boolean,
+        leftScale: boolean = false
     ) {
         this.reSize = this.reSize.bind(this)
 
@@ -78,7 +79,7 @@ export class Handler {
         this.wrapper.appendChild(this.div);
         window.containerDiv.append(this.wrapper)
         
-        this.chart = this._createChart();
+        this.chart = this._createChart(leftScale);
         this.series = this.createCandlestickSeries();
         this.volumeSeries = this.createVolumeSeries();
 
@@ -119,7 +120,7 @@ export class Handler {
         }
     }
 
-    private _createChart() {
+    private _createChart(leftScale: boolean = false) {
         return createChart(this.div, {
             width: window.innerWidth * this.scale.width,
             height: window.innerHeight * this.scale.height,
@@ -135,7 +136,7 @@ export class Handler {
                 scaleMargins: {top: 0.3, bottom: 0.25},
             },
             leftPriceScale: {
-                visible:true,
+                visible:leftScale,
                 scaleMargins:{top:.3,bottom:.25}},
             timeScale: {timeVisible: true, secondsVisible: false},
             crosshair: {
