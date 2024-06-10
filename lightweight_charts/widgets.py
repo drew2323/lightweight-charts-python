@@ -60,12 +60,12 @@ def emit_callback(window, string):
 
 class WxChart(abstract.AbstractChart):
     def __init__(self, parent, inner_width: float = 1.0, inner_height: float = 1.0,
-                 scale_candles_only: bool = False, toolbox: bool = False):
+                 scale_candles_only: bool = False, toolbox: bool = False, leftScale: bool = False):
         if wx is None:
             raise ModuleNotFoundError('wx.html2 was not found, and must be installed to use WxChart.')
         self.webview: wx.html2.WebView = wx.html2.WebView.New(parent)
         super().__init__(abstract.Window(self.webview.RunScript, 'window.wx_msg.postMessage.bind(window.wx_msg)'),
-                         inner_width, inner_height, scale_candles_only, toolbox)
+                         inner_width, inner_height, scale_candles_only, toolbox, leftScale=leftScale)
 
         self.webview.Bind(wx.html2.EVT_WEBVIEW_LOADED, lambda e: wx.CallLater(500, self.win.on_js_load))
         self.webview.Bind(wx.html2.EVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, lambda e: emit_callback(self.win, e.GetString()))
@@ -79,12 +79,12 @@ class WxChart(abstract.AbstractChart):
 
 class QtChart(abstract.AbstractChart):
     def __init__(self, widget=None, inner_width: float = 1.0, inner_height: float = 1.0,
-                 scale_candles_only: bool = False, toolbox: bool = False):
+                 scale_candles_only: bool = False, toolbox: bool = False, leftScale: bool = False):
         if QWebEngineView is None:
             raise ModuleNotFoundError('QWebEngineView was not found, and must be installed to use QtChart.')
         self.webview = QWebEngineView(widget)
         super().__init__(abstract.Window(self.webview.page().runJavaScript, 'window.pythonObject.callback'),
-                         inner_width, inner_height, scale_candles_only, toolbox)
+                         inner_width, inner_height, scale_candles_only, toolbox, leftScale=leftScale)
 
         self.web_channel = QWebChannel()
         self.bridge = Bridge(self)
@@ -115,7 +115,7 @@ class QtChart(abstract.AbstractChart):
 
 class StaticLWC(abstract.AbstractChart):
     def __init__(self, width=None, height=None, inner_width=1, inner_height=1,
-                 scale_candles_only: bool = False, toolbox=False, autosize=True):
+                 scale_candles_only: bool = False, toolbox=False, autosize=True, leftScale: bool = False):
 
         with open(abstract.INDEX.replace("index.html", 'styles.css'), 'r') as f:
             css = f.read()
@@ -132,7 +132,7 @@ class StaticLWC(abstract.AbstractChart):
                 .replace('</body>\n</html>', '<script>')
 
         super().__init__(abstract.Window(run_script=self.run_script), inner_width, inner_height,
-                         scale_candles_only, toolbox, autosize)
+                         scale_candles_only, toolbox, autosize, leftScale=leftScale)
         self.width = width
         self.height = height
 
@@ -154,8 +154,8 @@ class StaticLWC(abstract.AbstractChart):
 
 
 class StreamlitChart(StaticLWC):
-    def __init__(self, width=None, height=None, inner_width=1, inner_height=1, scale_candles_only: bool = False, toolbox: bool = False):
-        super().__init__(width, height, inner_width, inner_height, scale_candles_only, toolbox)
+    def __init__(self, width=None, height=None, inner_width=1, inner_height=1, scale_candles_only: bool = False, toolbox: bool = False, leftScale: bool = False):
+        super().__init__(width, height, inner_width, inner_height, scale_candles_only, toolbox, leftScale=leftScale)
 
     def _load(self):
         if sthtml is None:
@@ -164,8 +164,8 @@ class StreamlitChart(StaticLWC):
 
 
 class JupyterChart(StaticLWC):
-    def __init__(self, width: int = 800, height=350, inner_width=1, inner_height=1, scale_candles_only: bool = False, toolbox: bool = False):
-        super().__init__(width, height, inner_width, inner_height, scale_candles_only, toolbox, False)
+    def __init__(self, width: int = 800, height=350, inner_width=1, inner_height=1, scale_candles_only: bool = False, toolbox: bool = False, leftScale: bool = False):
+        super().__init__(width, height, inner_width, inner_height, scale_candles_only, toolbox, False, leftScale=leftScale)
 
         self.run_script(f'''
             for (var i = 0; i < document.getElementsByClassName("tv-lightweight-charts").length; i++) {{
