@@ -219,7 +219,7 @@ body {
 	z-index: 3000;
 	pointer-events: none;
 	top: 10px;
-	left: 10px;
+	left: 70px;
 	display: none;
 	flex-direction: column;
 }
