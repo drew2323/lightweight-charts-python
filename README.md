@@ -6,6 +6,8 @@ Fork of lightweight-charts with enhancements and supporting proprietary workflow
 * new markers_set method allowing to set pd.series or dataframe as markers input
 * allows vbt indicators as input for set() method (extracting real values series from that)
 
+<img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
+
 
 <div align="center">
     
