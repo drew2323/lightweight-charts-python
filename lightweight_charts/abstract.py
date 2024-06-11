@@ -13,7 +13,7 @@ from .drawings import Box, HorizontalLine, RayLine, TrendLine, TwoPointDrawing, 
 from .topbar import TopBar
 from .util import (
     BulkRunScript, Pane, Events, IDGen, as_enum, jbool, js_json, TIME, NUM, FLOAT,
-    LINE_STYLE, MARKER_POSITION, MARKER_SHAPE, CROSSHAIR_MODE,
+    LINE_STYLE, MARKER_POSITION, MARKER_SHAPE, CROSSHAIR_MODE, MARKER_TYPE,
     PRICE_SCALE_MODE, marker_position, marker_shape, js_data,
 )
 
@@ -274,12 +274,12 @@ class SeriesCommon(Pane):
         self._set_interval(df)
         if not pd.api.types.is_datetime64_any_dtype(df['time']):
             df['time'] = pd.to_datetime(df['time'])
-        df['time'] = df['time'].astype('int64') // 10 ** 9
+        df['time'] = df['time'].astype('int64') / 10 ** 9 #removed integer divison // 10 ** 9 to keep subseconds precision
         return df
 
     def _series_datetime_format(self, series: pd.Series, exclude_lowercase=None):
         series = series.copy()
-        series.index = self._format_labels(series, series.index, series.name, exclude_lowercase)
+        series.index = self._format_labels(series, series.name, series.index, exclude_lowercase)
         series['time'] = self._single_datetime_format(series['time'])
         return series
 
@@ -325,36 +325,83 @@ class SeriesCommon(Pane):
     def _update_markers(self):
         self.run_script(f'{self.id}.series.setMarkers({json.dumps(list(self.markers.values()))})')
 
-    def markers_set(self, markers_series: pd.Series,
+    def markers_set(self, markers: Union[pd.Series, pd.DataFrame],
+                    type: MARKER_TYPE = None,
+                    col_name: Optional[str] = None,
                     position: MARKER_POSITION = 'below',
                     shape: MARKER_SHAPE = 'arrow_up',
-                    color: str = '#2196F3',text: str = ''):
+                    color: str = '#2196F3', text: str = ''):
         """
-        Creates multiple markers from pd series.
-        :param markers: A pandas Series with DateTimeIndex and boolean values.
+        Adds multiple markers from pd series or Dataframe
+        :param markers: A pandas Series or Dataframe with DateTimeIndex and boolean values.
                         The index should be DateTimeIndex and values should be True/False.
+        :param type: The type of the marker to quickly style entries or exits
+        :param col_name: The name of the column to use in case of DataFrame
+        :param position: The position of the marker.
+        :param shape: The shape of the marker.
+        :param color: The color of the marker.
         :return: a list of marker ids.
 
-        It refreshes the markers, deleting the current.
+        It adds new markers to the chart. Existing markers will remain.
+        To delete markers use remove_marker() or clear_markers()
         """
-        if not isinstance(markers_series, pd.Series):
-            #raise exception
-            raise TypeError('Markers must be a pd.Series')
-        series = self._series_datetime_format(markers_series, exclude_lowercase=self.name)
-        marker_ids = []
-        self.markers = {}
-        for timestamp, value in series.iteritems():
-            if value:
-                marker_id = self.win._id_gen.generate()
-                self.markers[marker_id] = {
-                    "time": timestamp,
-                    "position": marker_position(position),  # Default position
-                    "color": color,   # Default color
-                    "shape": marker_shape(shape),    # Default shape
-                    "text": text,           # Default text
-                }
-                marker_ids.append(marker_id)
+        if type is not None:
+            match type:
+                case "entries":
+                    position = "below"
+                    shape = "arrow_up"
+                    color = "blue"
+                case "exits":
+                    position = "above"
+                    shape = "arrow_down"
+                    color = "red"
         
+        if isinstance(markers, pd.Series):
+            markers = markers.to_frame(name="markers")
+        markers = self._df_datetime_format(markers)
+    
+        # Get the list of columns in the DataFrame - must be datetimeindex
+        #either with one column, or col_name is set
+        columns = markers.columns.tolist()
+
+        if "time" not in columns:
+            raise ValueError("Time column required in the dataframe.")
+        
+        # If there are exactly two columns
+        if len(columns) == 2:
+            # Rename the non-"time" column to "value"
+            other_col = [col for col in columns if col != "time"][0]
+            markers.rename(columns={other_col: "value"}, inplace=True)
+        
+        # If there are more than two columns
+        elif len(columns) > 2:
+            if col_name in columns:
+                # Keep "time" and col_name column and rename it to "value"
+                markers = markers[["time", col_name]]
+                markers.rename(columns={col_name: "value"}, inplace=True)
+            else:
+                raise ValueError("Specify a column name in the dataframe.")
+        else:
+            raise ValueError("No matching columns in the dataframe.")
+        
+        marker_ids = []
+        #self.markers = {}
+
+        valid_rows = markers[markers['value']]  # Filter rows where value is True
+
+        for timestamp in valid_rows['time']:
+            marker_id = self.win._id_gen.generate()
+            self.markers[marker_id] = {
+                "time": timestamp,
+                "position": marker_position(position),  # Default position
+                "color": color,   # Default color
+                "shape": marker_shape(shape),    # Default shape
+                "text": text,           # Default text
+            }
+            marker_ids.append(marker_id)
+
+        # Sort markers by time
+        self.markers = dict(sorted(self.markers.items(), key=lambda item: item[1]["time"]))
         self._update_markers()
         return marker_ids
 
