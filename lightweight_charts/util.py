@@ -63,6 +63,7 @@ def js_json(d: dict):
 
 def jbool(b: bool): return 'true' if b is True else 'false' if b is False else None
 
+MARKER_TYPE = Literal['entries', 'exits']
 
 LINE_STYLE = Literal['solid', 'dotted', 'dashed', 'large_dashed', 'sparse_dotted']
 

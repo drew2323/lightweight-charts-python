@@ -8,8 +8,7 @@ handler.createToolBox();
 const data = generateCandleData();
 if (handler.series)
 handler.series.setData(data);
-
-
+//tady testovat markery
 
 
 
