@@ -5,7 +5,43 @@ from random import choices
 from typing import Literal, Union
 from numpy import isin
 import pandas as pd
+import re
+from matplotlib.colors import to_rgba
 
+def apply_opacity(color, opacity):
+    """
+    Converts any color format (named, hex, RGB, or RGBA) to RGBA format and applies a specified opacity.
+
+    Parameters:
+    - color (str): The color in named, hex, RGB, or RGBA format.
+    - opacity (float): The opacity value to apply, ranging from 0.0 to 1.0.
+
+    Returns:
+    - str: The color in 'rgba(r, g, b, opacity)' format with the specified opacity applied.
+
+    Raises:
+    - ValueError: If the opacity is not within the range of 0 to 1.
+    """
+    # Validate the opacity
+    if not (0 <= opacity <= 1):
+        raise ValueError("Opacity must be between 0 and 1")
+
+    # Check if color is already in rgba format
+    rgba_regex = r'rgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(?:,\s*([0-9\.]+))?\)'
+    match = re.match(rgba_regex, color)
+
+    if match:
+        # Color is in RGB or RGBA format
+        r, g, b = int(match.group(1)), int(match.group(2)), int(match.group(3))
+        current_opacity = float(match.group(4)) if match.group(4) else 1
+        # Apply the new opacity by multiplying with the current opacity if it exists
+        final_opacity = current_opacity * opacity
+    else:
+        # Color is a named color or hex; convert it using matplotlib
+        rgba = to_rgba(color)
+        r, g, b, _ = [int(255 * x) for x in rgba]
+        final_opacity = opacity  # Directly use the given opacity
+    return f"rgba({r}, {g}, {b}, {final_opacity})"
 
 def is_vbt_indicator(variable):
     # Get the module path of the variable's type

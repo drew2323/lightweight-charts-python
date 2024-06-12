@@ -148,13 +148,15 @@ def chart(panes: list[Panel], sync=False, title='', size="m"):
                             active_chart.markers_set(markers)
 
             for tup in pane.histogram:
-                    series, name, color, _, _ = (tup + (None, None, None, None, None))[:5]
+                    series, name, color, opacity, _ = (tup + (None, None, None, None, None))[:5]
                     if series is None:
                             continue
                     #conditionally include color
                     kwargs = {'name': name}
                     if color is not None:
-                            kwargs['color'] = color
+                            kwargs['color'] = color 
+                    if opacity is not None:
+                            kwargs['opacity'] = opacity
                     tmp = active_chart.create_histogram(**kwargs) #green transparent "rgba(53, 94, 59, 0.6)"
                     tmp.set(series)
 

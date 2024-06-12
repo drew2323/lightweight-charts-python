@@ -14,7 +14,7 @@ from .topbar import TopBar
 from .util import (
     BulkRunScript, Pane, Events, IDGen, as_enum, jbool, js_json, TIME, NUM, FLOAT,
     LINE_STYLE, MARKER_POSITION, MARKER_SHAPE, CROSSHAIR_MODE, MARKER_TYPE,
-    PRICE_SCALE_MODE, marker_position, marker_shape, js_data, is_vbt_indicator
+    PRICE_SCALE_MODE, marker_position, marker_shape, js_data, is_vbt_indicator, apply_opacity
 )
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -913,13 +913,15 @@ class AbstractChart(Candlestick, Pane):
     def create_histogram(
             self, name: str = '', color: str = None,
             price_line: bool = False, price_label: bool = True,
-            scale_margin_top: float = 0.0, scale_margin_bottom: float = 0.0
+            scale_margin_top: float = 0.0, scale_margin_bottom: float = 0.0, opacity: float = None,
     ) -> Histogram:
         """
         Creates and returns a Histogram object.
         """
         if color is None:
             color = get_next_color()
+        if opacity is not None:
+            color = apply_opacity(color, opacity)
         return Histogram(
             self, name, color, price_line, price_label,
             scale_margin_top, scale_margin_bottom)
