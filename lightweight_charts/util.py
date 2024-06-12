@@ -1,5 +1,5 @@
 import asyncio
-import json
+import orjson
 from datetime import datetime
 from random import choices
 from typing import Literal, Union
@@ -36,30 +36,54 @@ def parse_event_message(window, string):
     return func, args
 
 
+# def js_data(data: Union[pd.DataFrame, pd.Series]):
+#     if isinstance(data, pd.DataFrame):
+#         d = data.to_dict(orient='records')
+#         filtered_records = [{k: v for k, v in record.items() if v is not None and not pd.isna(v)} for record in d]
+#     else:
+#         d = data.to_dict()
+#         filtered_records = {k: v for k, v in d.items()}
+#     return json.dumps(filtered_records)
+
 def js_data(data: Union[pd.DataFrame, pd.Series]):
     if isinstance(data, pd.DataFrame):
-        d = data.to_dict(orient='records')
-        filtered_records = [{k: v for k, v in record.items() if v is not None and not pd.isna(v)} for record in d]
+        # Converting DataFrame to a list of dictionaries, filtering out NaN values
+        filtered_records = data.dropna().to_dict(orient='records')
     else:
-        d = data.to_dict()
-        filtered_records = {k: v for k, v in d.items()}
-    return json.dumps(filtered_records, indent=2)
+        # For pd.Series, convert to dict and drop NaN values
+        filtered_records = data.dropna().to_dict()
 
+    # Serialize using orjson, which returns bytes
+    # Decode bytes to string if necessary (JavaScript consumption requires string)
+    return orjson.dumps(filtered_records).decode('utf-8')
 
 def snake_to_camel(s: str):
     components = s.split('_')
     return components[0] + ''.join(x.title() for x in components[1:])
 
+# def js_json(d: dict):
+#     filtered_dict = {}
+#     for key, val in d.items():
+#         if key in ('self') or val in (None,):
+#             continue
+#         if '_' in key:
+#             key = snake_to_camel(key)
+#         filtered_dict[key] = val
+#     return f"JSON.parse('{json.dumps(filtered_dict)}')"
+
 def js_json(d: dict):
     filtered_dict = {}
     for key, val in d.items():
-        if key in ('self') or val in (None,):
+        if key == 'self' or val in (None,):
             continue
         if '_' in key:
             key = snake_to_camel(key)
         filtered_dict[key] = val
-    return f"JSON.parse('{json.dumps(filtered_dict)}')"
 
+    # Serialize the dictionary using orjson, automatically handling types that orjson can serialize
+    # Decode the bytes to string for use in JavaScript, escaping single quotes for JavaScript consumption
+    json_str = orjson.dumps(filtered_dict).decode('utf-8').replace("'", "\\'")
+    return f"JSON.parse('{json_str}')"
 
 def jbool(b: bool): return 'true' if b is True else 'false' if b is False else None
 

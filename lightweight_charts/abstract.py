@@ -275,6 +275,18 @@ class SeriesCommon(Pane):
         if not pd.api.types.is_datetime64_any_dtype(df['time']):
             df['time'] = pd.to_datetime(df['time'])
         df['time'] = df['time'].astype('int64') / 10 ** 9 #removed integer divison // 10 ** 9 to keep subseconds precision
+
+        # if 'updated' in df.columns:
+        #     df['updated'] = pd.to_datetime(df['updated']).astype('int64') / 10**9
+
+        # Iterate over all columns and convert any additional datetime columns to timestamps (for example updated)
+        for col in df.columns:
+            # Skip columns that are explicitly managed elsewhere or meant to be excluded
+            if col == 'time' or not pd.api.types.is_datetime64_any_dtype(df[col]):
+                continue
+            # Convert datetime to timestamp with nanosecond precision after the decimal
+            df[col] = pd.to_datetime(df[col]).astype('int64') / 10**9
+
         return df
 
     def _series_datetime_format(self, series: pd.Series, exclude_lowercase=None):
