@@ -30,7 +30,18 @@ class Panel:
         left=[(sma, "sma", short_signals, short_exits)],
         middle1=[],
         middle2=[],
-)
+    )
+
+    pane2 = Panel(
+        ohlcv=(t1data.data["BAC"],),
+        right=[],
+        left=[(sma, "sma_below", short_signals, short_exits)],
+        middle1=[],
+        middle2=[],
+        histogram=[(order_imbalance_sma, "oisma")],
+    )
+
+    ch = chart([pane1, pane2], sync=True, title="neco", size="m")
 
     ```
     """
