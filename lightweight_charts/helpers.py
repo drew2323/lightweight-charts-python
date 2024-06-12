@@ -21,8 +21,20 @@ class Panel:
 
     Examples
     -------
+    # Simple example
     ```
-    # Example usage
+    pane1 = Panel(
+        ohlcv=(), #(series, entries, exits, other_markers)
+        histogram=[], # [(series, name, "rgba(53, 94, 59, 0.6)")]
+        right=[],
+        left=[], #[(series, name, entries, exits, other_markers)]
+        middle1=[],
+        middle2=[],
+    )
+
+    ch = chart([pane1])
+
+    # Synced example
     pane1 = Panel(
         ohlcv=(t1data.data["BAC"],),  #(series, entries, exits, other_markers)
         histogram=[(order_imbalance_allvolume, "oivol")], # [(series, name, "rgba(53, 94, 59, 0.6)")]
@@ -42,7 +54,6 @@ class Panel:
     )
 
     ch = chart([pane1, pane2], sync=True, title="neco", size="m")
-
     ```
     """
     def __init__(self, ohlcv=None, right=None, left=None, middle1=None, middle2=None, histogram=None, title=None):
