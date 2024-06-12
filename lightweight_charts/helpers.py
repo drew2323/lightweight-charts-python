@@ -1,4 +1,7 @@
-from lightweight_charts.widgets import JupyterChart
+from .widgets import JupyterChart
+from .util import (
+    is_vbt_indicator
+)
 
 class Panel:
     """
@@ -167,8 +170,19 @@ def chart(panes: list[Panel], sync=False, title='', size="m"):
                             series, name, entries, exits, markers = (tup + (None, None, None, None, None))[:5]
                             if series is None:
                                 continue
-                            tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
-                            tmp.set(series)
+
+                            #pokud jde o vbt indikator vytahneme vsechny output a predpokladame, ze jde o lines a vykreslime je
+                            if is_vbt_indicator(series):
+                                for output in series.output_names:
+                                    output_series = getattr(series, output)       
+                                    tmp = active_chart.create_line(name=output, priceScaleId=att_name)#, color="blue")
+                                    tmp.set(output_series)
+                            else:
+                                if name is None:
+                                      name = "no_name"
+
+                                tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
+                                tmp.set(series)
 
                             if entries is not None:
                                 tmp.markers_set(entries, "entries")

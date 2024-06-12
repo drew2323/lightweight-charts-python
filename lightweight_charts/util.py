@@ -7,6 +7,12 @@ from numpy import isin
 import pandas as pd
 
 
+def is_vbt_indicator(variable):
+    # Get the module path of the variable's type
+    module_path = variable.__class__.__module__
+    # Check if it starts with 'vectorbtpro.indicators'
+    return module_path.startswith('vectorbtpro.indicators')
+
 class Pane:
     def __init__(self, window):
         from lightweight_charts import Window

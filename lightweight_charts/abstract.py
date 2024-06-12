@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Callable, Union, Literal, List, Optional
 import pandas as pd
 import random
-from vectorbtpro.indicators import IndicatorFactory 
+#from vectorbtpro.indicators import IndicatorFactory 
 from .table import Table
 from .toolbox import ToolBox
 from .drawings import Box, HorizontalLine, RayLine, TrendLine, TwoPointDrawing, VerticalLine, VerticalSpan
@@ -14,17 +14,11 @@ from .topbar import TopBar
 from .util import (
     BulkRunScript, Pane, Events, IDGen, as_enum, jbool, js_json, TIME, NUM, FLOAT,
     LINE_STYLE, MARKER_POSITION, MARKER_SHAPE, CROSSHAIR_MODE, MARKER_TYPE,
-    PRICE_SCALE_MODE, marker_position, marker_shape, js_data,
+    PRICE_SCALE_MODE, marker_position, marker_shape, js_data, is_vbt_indicator
 )
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 INDEX = os.path.join(current_dir, 'js', 'index.html')
-
-def is_indicator(variable):
-    # Get the module path of the variable's type
-    module_path = variable.__class__.__module__
-    # Check if it starts with 'vectorbtpro.indicators'
-    return module_path.startswith('vectorbtpro.indicators')
 
 # # Predefined colors that stand out well on dark backgrounds
 # COLORS = [
@@ -309,7 +303,7 @@ class SeriesCommon(Pane):
             self.run_script(f'{self.id}.series.setData([])')
             self.data = pd.DataFrame()
             return
-        if is_indicator(df):
+        if is_vbt_indicator(df):
             df = df.real
         #if df is pd.Series then convert to df
         if isinstance(df, pd.Series):
