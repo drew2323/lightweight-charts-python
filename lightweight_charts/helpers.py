@@ -1,6 +1,39 @@
 from lightweight_charts.widgets import JupyterChart
 
 class Panel:
+    """
+    A class to represent a panel in a chart.
+
+    Attributes
+    ----------
+    * ohlcv : tuple optional\n
+        (series, entries, exits, other_markers)
+    * histogram : list of tuples, optional.\n
+        [(series, name, color)]
+    * title : str, optional
+        The title of the panel. Default is None.
+    * right : list of tuples, optional
+        A list of line tuples in given scale.\n
+        [(series, name, entries, exits, other_markers)]
+    * left : list of tuples, optional
+    * middle1 : list of tuples, optional
+    * middle2 : list of tuples, optional
+
+    Examples
+    -------
+    ```
+    # Example usage
+    pane1 = Panel(
+        ohlcv=(t1data.data["BAC"],),  #(series, entries, exits, other_markers)
+        histogram=[(order_imbalance_allvolume, "oivol")], # [(series, name, "rgba(53, 94, 59, 0.6)")]
+        right=[], # [(series, name, entries, exits, other_markers)]
+        left=[(sma, "sma", short_signals, short_exits)],
+        middle1=[],
+        middle2=[],
+)
+
+    ```
+    """
     def __init__(self, ohlcv=None, right=None, left=None, middle1=None, middle2=None, histogram=None, title=None):
         self.ohlcv = ohlcv if ohlcv is not None else []
         self.right = right if right is not None else []
@@ -10,30 +43,44 @@ class Panel:
         self.histogram = histogram if histogram is not None else []
         self.title = title
     
+
+
+
 def chart(panes: list[Panel], sync=False, title='', size="m"):
-    """Function to fast render a chart with multiple panes.
+    """
+    Function to fast render a chart with multiple panes. This function manipulates graphical
+    output or interfaces with an external framework to display charts with synchronized
+    scales if required.
 
     Args:
-    panes (List[Pane]): A list of Pane instances to be rendered in the chart.
-    sync (bool): If True, synchronize scales of all panes. Default is False.
-    title (str): Title of the chart. Default is an empty string.
+    -----
+        * panes (List[Pane]): A list of Pane instances to be rendered in the chart. Each Pane
+                            can include various data series and configurations such as OHLCV,
+                            histograms, and indicators positioned on left, right, or middle scales.
+        * sync (bool): If True, synchronize scales of all panes to have the same scale limits.
+                     Default is False.
+        * title (str): Title of the chart. If not specified, defaults to an empty string.
+
+        * size (str): The size designation, which can be 's', 'm', or 'xl'. Defaults to'm'.
+                    Expected values:
+                    - 's' for small
+                    - 'm' for medium
+                    - 'xl' for extra large
 
     Returns:
-    None. This function is expected to manipulate a graphical output or an external framework.
+        None: This function does not return a value. It performs operations to render graphical content.
 
-    # Example usage
+    Examples:
+    ---------
     ```
     pane1 = Pane(
-        ohlcv=(t1data.data["BAC"],),  #(series, entries, exits, other_markers)
-        histogram=[(order_imbalance_allvolume, "oivol")] # [(series, name, "rgba(53, 94, 59, 0.6)")]
-        #following attributes corresponds to different priceScaleId and allow to display
-        # line series on these scale
-        right=[], # [(series, name, entries, exits, other_markers)]
+        ohlcv=(t1data.data["BAC"],),
+        histogram=[(order_imbalance_allvolume, "oivol")]
+        right=[],
         left=[(sma, "sma", short_signals, short_exits)],
         middle1=[],
         middle2=[],
     )
-
     pane2 = Pane(
         ohlcv=(t1data.data["BAC"],),
         right=[],
@@ -42,9 +89,11 @@ def chart(panes: list[Panel], sync=False, title='', size="m"):
         middle2=[],
         histogram=[(order_imbalance_sma, "oisma")]
     )
-
-    ch = chart([pane1, pane2], sync=True)
+    ch = chart([pane1, pane2], sync=True, title="Chart", size="l")
     ```
+
+    Notes:
+    ------
 
     """
     size_to_dimensions = {
