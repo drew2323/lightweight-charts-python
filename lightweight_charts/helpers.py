@@ -1,0 +1,112 @@
+from lightweight_charts.widgets import JupyterChart
+
+class Panel:
+    def __init__(self, ohlcv=None, right=None, left=None, middle1=None, middle2=None, histogram=None, title=None):
+        self.ohlcv = ohlcv if ohlcv is not None else []
+        self.right = right if right is not None else []
+        self.left = left if left is not None else []
+        self.middle1 = middle1 if middle1 is not None else []
+        self.middle2 = middle2 if middle2 is not None else []
+        self.histogram = histogram if histogram is not None else []
+        self.title = title
+    
+def chart(panes: list[Panel], sync=False, title=''):
+       """Function to fast render a chart with multiple panes.
+
+       Args:
+       panes (List[Pane]): A list of Pane instances to be rendered in the chart.
+       sync (bool): If True, synchronize scales of all panes. Default is False.
+       title (str): Title of the chart. Default is an empty string.
+
+       Returns:
+       None. This function is expected to manipulate a graphical output or an external framework.
+       
+       # Example usage
+       ```
+        pane1 = Pane(
+            ohlcv=(t1data.data["BAC"],),  #(series, entries, exits, other_markers)
+            histogram=[(order_imbalance_allvolume, "oivol")] # [(series, name, "rgba(53, 94, 59, 0.6)")]
+            #following attributes corresponds to different priceScaleId and allow to display
+            # line series on these scale
+            right=[], # [(series, name, entries, exits, other_markers)]
+            left=[(sma, "sma", short_signals, short_exits)],
+            middle1=[],
+            middle2=[],
+        )
+
+        pane2 = Pane(
+            ohlcv=(t1data.data["BAC"],),
+            right=[],
+            left=[(sma, "sma_below", short_signals, short_exits)],
+            middle1=[],
+            middle2=[],
+            histogram=[(order_imbalance_sma, "oisma")]
+        )
+
+        ch = chart([pane1, pane2], sync=True)
+        ```
+       
+       """
+       numpanes = len(panes)
+       main_title_set = False
+       for index, pane in enumerate(panes):
+              subchartX = None
+              if index == 0:
+                     chartX = JupyterChart(width=1000, height=600, inner_width=1, inner_height=0.5, leftScale=bool(pane.left))
+                     active_chart = chartX
+              else:
+                     subchartX = chartX.create_subchart(position='right', width=1, height=0.5, sync=sync, leftScale=bool(pane.left))
+                     active_chart = subchartX
+
+              if pane.ohlcv is not None:
+                     series, entries, exits, markers = (pane.ohlcv + (None,) * 4)[:4]
+                     active_chart.set(series)
+                     if entries is not None:
+                            active_chart.markers_set(entries, "entries")
+                     if exits is not None:
+                            active_chart.markers_set(exits, "exits")
+                     if markers is not None:
+                            active_chart.markers_set(markers)
+
+              for tup in pane.histogram:
+                     series, name, color, _, _ = (tup + (None, None, None, None, None))[:5]
+                     if series is None:
+                            continue
+                     #conditionally include color
+                     kwargs = {'name': name}
+                     if color is not None:
+                            kwargs['color'] = color
+                     tmp = active_chart.create_histogram(**kwargs) #green transparent "rgba(53, 94, 59, 0.6)"
+                     tmp.set(series)
+
+              if pane.title is not None:
+                    active_chart.topbar.textbox("title",pane.title)
+                    main_title_set = True if index==0 else False
+
+              #iterate over keys - they are all priceScaleId except of histogram and ohlcv
+              for att_name, att_value_tuple in vars(pane).items():
+                     if att_name in ["ohlcv","histogram","title"]:
+                            continue
+                     for tup in att_value_tuple:
+                            series, name, entries, exits, markers = (tup + (None, None, None, None, None))[:5]
+                            if series is None:
+                                   continue
+                            tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
+                            tmp.set(series)
+
+                            if entries is not None:
+                                   tmp.markers_set(entries, "entries")
+                            if exits is not None:
+                                   tmp.markers_set(exits, "exits")
+                            if markers is not None:
+                                   tmp.markers_set(markers)
+              
+              active_chart.legend(True)
+              active_chart.fit()
+
+       if not main_title_set:
+             chartX.topbar.textbox("title",title)
+       chartX.legend(True)
+       chartX.fit()
+       chartX.load()
+       return chartX
