@@ -72,7 +72,7 @@ class Panel:
         self.xloc = xloc
 
 
-def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None):
+def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30"):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized
@@ -92,6 +92,8 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None):
                     - 's' for small
                     - 'm' for medium
                     - 'xl' for extra large
+
+        * session (str): Draw session vertical divider at that time. Defaults to '9:30'. Can be any time in 24-hour format or xloc slice
 
         * xloc (str): xloc advanced filtering of vbt.xloc accessor. Defaults to None. Applies to all panes.
         Might be overriden by pane-specific xloc.
@@ -131,7 +133,7 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None):
         middle2=[],
         histogram=[(order_imbalance_sma, "oisma")]
     )
-    ch = chart([pane1, pane2], sync=True, title="Chart", size="l", xloc=slice("2024-02-12 09:30","2024-02-12 16:00"))
+    ch = chart([pane1, pane2], sync=True, title="Chart", size="l", xloc=slice("2024-02-12 09:30","2024-02-12 16:00"), session="9:30")
     ```
 
     Notes:
@@ -221,6 +223,8 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None):
             
             active_chart.legend(True)
             active_chart.fit()
+            if session is not None and session:
+                active_chart.vertical_span(start_time=xloc_me(series, xloc).vbt.xloc[session].obj.index.to_list(), color="rgba(252, 219, 3, 0.4)")
 
     if not main_title_set:
             chartX.topbar.textbox("title",title)
