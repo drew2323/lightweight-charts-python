@@ -2,6 +2,28 @@ from .widgets import JupyterChart
 from .util import (
     is_vbt_indicator
 )
+import pandas as pd
+
+# Register the custom accessor
+@pd.api.extensions.register_series_accessor("lw")
+class PlotAccessor:
+    """
+    Custom plot accessor for pandas series.
+
+    Usage: s
+    series.lw.plot()
+    series.lw.plot(size="m")
+    """
+    def __init__(self, pandas_obj):
+        self._obj = pandas_obj
+
+    def plot(self, **kwargs):
+        if "size" not in kwargs:
+            kwargs["size"] = "xs"
+        pane1 = Panel(
+            right=[(self._obj, "line")],
+        )
+        ch = chart([pane1], **kwargs)
 
 class Panel:
     """
@@ -64,7 +86,7 @@ class Panel:
     ```
     """
     def __init__(self, ohlcv=None, right=None, left=None, middle1=None, middle2=None, histogram=None, title=None, xloc=None, precision=None):
-        self.ohlcv = ohlcv if ohlcv is not None else []
+        self.ohlcv = ohlcv if ohlcv is not None else ()
         self.right = right if right is not None else []
         self.left = left if left is not None else []
         self.middle1 = middle1 if middle1 is not None else []
@@ -92,6 +114,7 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
 
         * size (str): The size designation, which can be 's', 'm', or 'xl'. Defaults to'm'.
                     Expected values:
+                    - 'xs' for extra-small
                     - 's' for small
                     - 'm' for medium
                     - 'xl' for extra large
@@ -154,6 +177,7 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
                 return dfsr.vbt.xloc[xloc].obj
 
     size_to_dimensions = {
+            'xs': (600, 300),
             's': (800, 400),
             'm': (1000, 600),
             'l': (1300, 800)}
