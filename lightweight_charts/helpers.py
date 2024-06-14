@@ -22,6 +22,7 @@ class Panel:
     * middle1 : list of tuples, optional
     * middle2 : list of tuples, optional
     * xloc : str or slice, optional. Vectorbt indexing. Default is None.
+    * precision: int, optional. The number of digits after the decimal point. Apply to all lines on this pane. Default is None.
 
     Examples
     -------
@@ -46,7 +47,8 @@ class Panel:
         left=[(sma, "sma", short_signals, short_exits)],
         middle1=[],
         middle2=[],
-        xloc="2024-02-12 09:30"
+        xloc="2024-02-12 09:30",
+        precision=3
     )
 
     pane2 = Panel(
@@ -61,7 +63,7 @@ class Panel:
     ch = chart([pane1, pane2], sync=True, title="neco", size="m", xloc=slice("2024-02-12 09:30","2024-02-12 16:00"))
     ```
     """
-    def __init__(self, ohlcv=None, right=None, left=None, middle1=None, middle2=None, histogram=None, title=None, xloc=None):
+    def __init__(self, ohlcv=None, right=None, left=None, middle1=None, middle2=None, histogram=None, title=None, xloc=None, precision=None):
         self.ohlcv = ohlcv if ohlcv is not None else []
         self.right = right if right is not None else []
         self.left = left if left is not None else []
@@ -70,9 +72,10 @@ class Panel:
         self.histogram = histogram if histogram is not None else []
         self.title = title
         self.xloc = xloc
+        self.precision = precision
 
 
-def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30"):
+def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30", precision=None):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized
@@ -94,6 +97,8 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
                     - 'xl' for extra large
 
         * session (str): Draw session vertical divider at that time. Defaults to '9:30'. Can be any time in 24-hour format or xloc slice
+
+        * precision (int): The number of digits after the decimal point. Defaults to None. Applies to lines on all panes, if not overriden by pane-specific precision.
 
         * xloc (str): xloc advanced filtering of vbt.xloc accessor. Defaults to None. Applies to all panes.
         Might be overriden by pane-specific xloc.
@@ -123,7 +128,8 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
         left=[(sma, "sma", short_signals, short_exits)],
         middle1=[],
         middle2=[],
-        xloc=slice("2024-02-12 09:30","2024-02-12 16:00")
+        xloc=slice("2024-02-12 09:30","2024-02-12 16:00"),
+        precision=4
     )
     pane2 = Pane(
         ohlcv=(t1data.data["BAC"],),
@@ -162,6 +168,7 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
             else:
                     subchartX = chartX.create_subchart(position='right', width=1, height=height_ratio, sync=sync, leftScale=bool(pane.left))
                     active_chart = subchartX
+
             xloc = pane.xloc if pane.xloc is not None else xloc
 
             if pane.ohlcv is not None:
@@ -193,7 +200,7 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
 
             #iterate over keys - they are all priceScaleId except of these
             for att_name, att_value_tuple in vars(pane).items():
-                    if att_name in ["ohlcv","histogram","title","xloc"]:
+                    if att_name in ["ohlcv","histogram","title","xloc","precision"]:
                             continue
                     for tup in att_value_tuple:
                             series, name, entries, exits, markers = (tup + (None, None, None, None, None))[:5]
@@ -214,6 +221,9 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
                                 tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
                                 tmp.set(xloc_me(series, xloc))
 
+                            if pane.precision is not None or precision is not None:
+                                  tmp.precision(pane.precision if pane.precision is not None else precision)
+
                             if entries is not None:
                                 tmp.markers_set(xloc_me(entries, xloc), "entries")
                             if exits is not None:
@@ -224,7 +234,7 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
             active_chart.legend(True)
             active_chart.fit()
             if session is not None and session:
-                active_chart.vertical_span(start_time=xloc_me(series, xloc).vbt.xloc[session].obj.index.to_list(), color="rgba(252, 219, 3, 0.4)")
+                active_chart.vertical_span(start_time=xloc_me(series, xloc).vbt.xloc[session].obj.index.to_list(), color="rgba(252, 255, 187, 0.42)")
 
     if not main_title_set:
             chartX.topbar.textbox("title",title)
