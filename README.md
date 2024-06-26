@@ -6,7 +6,7 @@ Fork of lightweight-charts with enhancements and supporting proprietary workflow
 * new markers_set method allowing to set pd.series or dataframe as markers input
 * supports simple df/sr accessors `close.lw.plot()` for quick visualization of single panel chart
 * supports `ch = chart([pane1, pane2], sync=True, title="Title", size="m")` to quickly display chart with N panes (`Panels`). Also supports syncing the Panels `sync=True` or using xloc.
-* 
+  
 
 <img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
 
