@@ -1,8 +1,8 @@
 Fork of lightweight-charts with enhancements and supporting proprietary workflow
 * colored legends
-* self picking colors
+* automatic colors if not provided
 * support for left price scale
-* support from pd series as input to set series
+* supports series in df,pd.series or vectorbt indicator object
 * new markers_set method allowing to set pd.series or dataframe as markers input
 * allows vbt indicators as input for set() method (extracting real values series from that)
 
