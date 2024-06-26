@@ -2,9 +2,8 @@ Fork of lightweight-charts with enhancements and supporting proprietary workflow
 * colored legends
 * automatic colors if not provided
 * support for left price scale
-* supports series in df,pd.series or vectorbt indicator object
+* as inputs it supports df,pd.series or vectorbtpro indicator object (including multi outputs) for set() method
 * new markers_set method allowing to set pd.series or dataframe as markers input
-* allows vbt indicators as input for set() method (extracting real values series from that)
 
 <img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
 
