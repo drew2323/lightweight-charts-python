@@ -8,6 +8,46 @@ Fork of lightweight-charts with enhancements and supporting proprietary workflow
 
 <img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
 
+## Examples
+
+```python
+from lightweight_charts import chart, Panel
+
+# Example usage
+pane1 = Panel(
+    ohlcv=(t1data.data["BAC"],),     #(series, entries, exits, other_markers)
+    histogram=[(order_imbalance_allvolume, "oivol",None, 0.3)],  # [(series, name, "rgba(53, 94, 59, 0.6)", opacity)]
+    
+    #following attributes assign lineseries series to different priceScaleIds, format: # [(series, name, entries, exits, other_markers)]
+    right=[(bbands)],   #multioutput indicator, outputs are autom.extracted
+    left=[(sma, "sma", short_signals, short_exits) #simple vbt indicator with markers in and outs
+          (supertrend.trend, "ST_trend") #explicitly just one output of multioutput indicator
+         ], 
+    middle1=[],
+    middle2=[],
+)
+
+pane2 = Panel(
+    ohlcv=(t1data.data["BAC"],),
+    right=[],
+    left=[(sma, "sma_below", short_signals, short_exits)],
+    middle1=[],
+    middle2=[],
+    histogram=[(order_imbalance_sma, "oisma")],
+)
+
+ch = chart([pane1, pane2], sync=True, title="Title", size)
+
+#quick few liner
+pane1 = Panel(
+    right=[(close, "close")],
+)
+ch = chart([pane1])
+
+#one liner
+close.lw.plot()
+
+```
 
 <div align="center">
     
