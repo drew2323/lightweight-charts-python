@@ -5,7 +5,7 @@ Fork of lightweight-charts with enhancements and supporting proprietary workflow
 * as inputs it supports df,pd.series or vectorbtpro indicator object (including unpacking multi outputs) for set() method
 * new markers_set method allowing to set pd.series or dataframe as markers input
 * supports simple df/sr accessors `close.lw.plot()` for quick visualization of single panel chart
-* supports `ch = chart([pane1, pane2], sync=True, title="Title", size="m")` to quickly display chart with N panes (`Panels`).
+* supports `ch = chart([pane1, pane2], sync=True, title="Title", size="m")` to quickly display chart with N panes (`Panels`). Also supports syncing the Panels `sync=True` or using xloc.
 * 
 
 <img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
@@ -15,7 +15,18 @@ Fork of lightweight-charts with enhancements and supporting proprietary workflow
 ```python
 from lightweight_charts import chart, Panel
 
-# Example usage
+#one liner, displays close series as line on single Panel
+close.lw.plot()
+
+#quick few liner, displays close series with label "close" on right pricescale and rsi on left price scale, all on single Panel
+pane1 = Panel(
+    right=[(close, "close")],
+    left=[(rsi,"rsi")]
+)
+ch = chart([pane1])
+
+# display two Panels
+# on first displays ohlcv data, orderimbalance volume as histogram with opacity, bbands on the right pricescale and sma with short_signals and short_exits on the left pricescale
 pane1 = Panel(
     ohlcv=(t1data.data["BAC"],),     #(series, entries, exits, other_markers)
     histogram=[(order_imbalance_allvolume, "oivol",None, 0.3)],  # [(series, name, "rgba(53, 94, 59, 0.6)", opacity)]
@@ -28,7 +39,7 @@ pane1 = Panel(
     middle1=[],
     middle2=[],
 )
-
+#on second panel displays also ohlcv data, and sma on the left pricescale and histogram
 pane2 = Panel(
     ohlcv=(t1data.data["BAC"],),
     right=[],
@@ -38,16 +49,8 @@ pane2 = Panel(
     histogram=[(order_imbalance_sma, "oisma")],
 )
 
-ch = chart([pane1, pane2], sync=True, title="Title", size)
-
-#quick few liner
-pane1 = Panel(
-    right=[(close, "close")],
-)
-ch = chart([pane1])
-
-#one liner
-close.lw.plot()
+#display both Panels, sync them and pick size, use xloc
+ch = chart([pane1, pane2], sync=True, title="Title", size="l", xloc=slice("1-1-2024","1-2-2024")
 
 ```
 
