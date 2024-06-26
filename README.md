@@ -1,4 +1,4 @@
-Fork of lightweight-charts with enhancements and supporting proprietary workflow
+Fork of original [lightweight-charts](louisnw01/lightweight-charts-python) with enhancements and supporting proprietary workflow
 * colored legends
 * automatic colors if not provided
 * support for left and mid price scales
