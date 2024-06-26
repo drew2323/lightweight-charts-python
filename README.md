@@ -26,7 +26,8 @@ pane1 = Panel(
 ch = chart([pane1])
 
 # display two Panels
-# on first displays ohlcv data, orderimbalance volume as histogram with opacity, bbands on the right pricescale and sma with short_signals and short_exits on the left pricescale
+# on first displays ohlcv data, orderimbalance volume as histogram with opacity, bbands on the right pricescale and
+# sma with short_signals and short_exits on the left pricescale
 pane1 = Panel(
     ohlcv=(t1data.data["BAC"],),     #(series, entries, exits, other_markers)
     histogram=[(order_imbalance_allvolume, "oivol",None, 0.3)],  # [(series, name, "rgba(53, 94, 59, 0.6)", opacity)]
