@@ -1,6 +1,6 @@
 from .widgets import JupyterChart
 from .util import (
-    is_vbt_indicator
+    is_vbt_indicator, get_next_color
 )
 import pandas as pd
 
@@ -32,7 +32,8 @@ class Panel:
     Attributes
     ----------
     * ohlcv : tuple optional\n
-        (series, entries, exits, other_markers)
+        (series, entries, exits, other_markers).\n
+        entries, exits and other_markers can be sr/df or lists of sr/df or list of tuples (if you want to specify color)
     * histogram : list of tuples, optional.\n
         [(series, name, color, opacity)]
     * title : str, optional
@@ -83,6 +84,26 @@ class Panel:
     )
 
     ch = chart([pane1, pane2], sync=True, title="neco", size="m", xloc=slice("2024-02-12 09:30","2024-02-12 16:00"))
+
+    #Markers examples
+
+    #assume i want to display simple entries or exits on series or ohlcv 
+    #based on tuple positions it determines entries or exits (and set colors and shape accordingly)
+    pane1 = Panel(
+        ohlcv=(ohlcv_df, clean_long_entries, clean_short_entries)
+    )
+    ch = chart([pane1], title="Chart with Entry/Exit Markers", session=None, size="s")
+
+    #if you want to display more entries or exits, use tuples with their colors
+    # Create Panel with OHLC data and entry signals
+    pane1 = Panel(
+        ohlcv=(data.ohlcv.get(),
+            [(clean_long_entries, "yellow"), (clean_short_entries, "pink")], #list of entries tuples with color
+            [(clean_long_exits, "yellow"), (clean_short_exits, "pink")]), #list of exits tuples with color
+    )
+
+    # # Create the chart with the panel
+    ch = chart([pane1], title="Chart with EntryShort/ExitShort (yellow) and EntryLong/ExitLong markers (pink)", sync=True, session=None, size="s")
     ```
     """
     def __init__(self, ohlcv=None, right=None, left=None, middle1=None, middle2=None, histogram=None, title=None, xloc=None, precision=None):
@@ -97,7 +118,7 @@ class Panel:
         self.precision = precision
 
 
-def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30", precision=None):
+def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30:00", precision=None):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized
@@ -177,13 +198,14 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
                 return dfsr.vbt.xloc[xloc].obj
 
     size_to_dimensions = {
-            'xs': (600, 300),
+            'xs': (600, 200),
             's': (800, 400),
             'm': (1000, 600),
             'l': (1300, 800)}
     width, height = size_to_dimensions.get(size, (1000, 600))
     height_ratio = 1 / len(panes)
     main_title_set = False
+    output_series = None
     for index, pane in enumerate(panes):
             subchartX = None
             if index == 0:
@@ -195,15 +217,30 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
 
             xloc = pane.xloc if pane.xloc is not None else xloc
 
-            if pane.ohlcv is not None:
+            def display_markers(active_chart: JupyterChart, markers, type= None, xloc=None):
+                color = None
+                if isinstance(markers, list):
+                        for markerset in markers:
+                            if isinstance(markerset, tuple):
+                                  markerset,color = markerset
+                            active_chart.markers_set(markers=xloc_me(markerset, xloc), type=type, color=color if color is not None else None)
+                else:
+                    if isinstance(markers, tuple):
+                        markers,color = markers
+                    active_chart.markers_set(markers=xloc_me(markers, xloc), type=type, color=color if color is not None else None)                  
+
+
+            if pane.ohlcv != ():
                     series, entries, exits, markers = (pane.ohlcv + (None,) * 4)[:4]
+                    if series is None:
+                          raise ValueError("OHLCV series cannot be None. Omit the OHLCV tuple.")
                     active_chart.set(xloc_me(series, xloc))
                     if entries is not None:
-                            active_chart.markers_set(xloc_me(entries, xloc), "entries")
+                        display_markers(active_chart=active_chart, markers=entries, type="entries", xloc=xloc)
                     if exits is not None:
-                            active_chart.markers_set(xloc_me(exits, xloc), "exits")
+                        display_markers(active_chart=active_chart, markers=exits, type="exits", xloc=xloc)
                     if markers is not None:
-                            active_chart.markers_set(xloc_me(markers, xloc))
+                        display_markers(chart=active_chart, markers=markers, xloc=xloc)
 
             for tup in pane.histogram:
                     series, name, color, opacity, _ = (tup + (None, None, None, None, None))[:5]
@@ -235,7 +272,8 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
                             if is_vbt_indicator(series):
                                 series = series.xloc[xloc] if xloc is not None else series
                                 for output in series.output_names:
-                                    output_series = getattr(series, output)       
+                                    output_series = getattr(series, output)
+                                    output = name + ':' + output if name is not None else output       
                                     tmp = active_chart.create_line(name=output, priceScaleId=att_name)#, color="blue")
                                     tmp.set(output_series)
                             else:
@@ -249,16 +287,17 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
                                   tmp.precision(pane.precision if pane.precision is not None else precision)
 
                             if entries is not None:
-                                tmp.markers_set(xloc_me(entries, xloc), "entries")
+                                display_markers(active_chart=tmp, markers=entries, type="entries", xloc=xloc)
                             if exits is not None:
-                                tmp.markers_set(xloc_me(exits, xloc), "exits")
+                                display_markers(active_chart=tmp, markers=exits, type="exits", xloc=xloc)
                             if markers is not None:
-                                tmp.markers_set(xloc_me(markers, xloc))
+                                display_markers(active_chart=tmp, markers=markers, xloc=xloc)
             
             active_chart.legend(True)
             active_chart.fit()
             if session is not None and session:
-                active_chart.vertical_span(start_time=xloc_me(series, xloc).vbt.xloc[session].obj.index.to_list(), color="rgba(252, 255, 187, 0.42)")
+                last_used_series = output_series if is_vbt_indicator(series) else series #pokud byl posledni series vbt, pak pouzijeme jeho outputy
+                active_chart.vertical_span(start_time=xloc_me(last_used_series, xloc).vbt.xloc[session].obj.index.to_list(), color="rgba(252, 255, 187, 0.42)")
 
     if not main_title_set:
             chartX.topbar.textbox("title",title)
