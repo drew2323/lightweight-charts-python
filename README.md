@@ -1,12 +1,87 @@
-Fork of lightweight-charts with enhancements and supporting proprietary workflow
+Fork of original [lightweight-charts](louisnw01/lightweight-charts-python) with enhancements and supporting proprietary workflow
 * colored legends
-* self picking colors
-* support for left price scale
-* support from pd series as input to set series
+* automatic colors if not provided
+* support for left and mid price scales
+* as inputs it supports df,pd.series or vectorbtpro indicator object (including unpacking multi outputs) for set() method
 * new markers_set method allowing to set pd.series or dataframe as markers input
-* allows vbt indicators as input for set() method (extracting real values series from that)
+* supports simple df/sr accessors `close.lw.plot()` for quick visualization of single panel chart
+* supports `ch = chart([pane1, pane2], sync=True, title="Title", size="m")` to quickly display chart with N panes (`Panels`). Also supports syncing the Panels `sync=True` or using xloc.
+  
 
 <img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
+
+## Examples
+
+```python
+from lightweight_charts import chart, Panel
+
+#one liner, displays close series as line on single Panel
+close.lw.plot()
+
+#quick few liner, displays close series with label "close" on right pricescale and rsi on left price scale, all on single Panel
+pane1 = Panel(
+    right=[(close, "close")],
+    left=[(rsi,"rsi")]
+)
+ch = chart([pane1])
+
+# display two Panels
+# on first displays ohlcv data, orderimbalance volume as histogram with opacity, bbands on the right pricescale and
+# sma with short_signals and short_exits on the left pricescale
+pane1 = Panel(
+    ohlcv=(t1data.data["BAC"],),     #(series, entries, exits, other_markers)
+    histogram=[(order_imbalance_allvolume, "oivol",None, 0.3)],  # [(series, name, "rgba(53, 94, 59, 0.6)", opacity)]
+    
+    #following attributes assign lineseries series to different priceScaleIds, format: # [(series, name, entries, exits, other_markers)]
+    right=[(bbands)],   #multioutput indicator, outputs are autom.extracted
+    left=[(sma, "sma", short_signals, short_exits) #simple vbt indicator with markers in and outs
+          (supertrend.trend, "ST_trend") #explicitly just one output of multioutput indicator
+         ], 
+    middle1=[],
+    middle2=[],
+)
+#on second panel displays also ohlcv data, and sma on the left pricescale and histogram
+pane2 = Panel(
+    ohlcv=(t1data.data["BAC"],),
+    right=[],
+    left=[(sma, "sma_below", short_signals, short_exits)],
+    middle1=[],
+    middle2=[],
+    histogram=[(order_imbalance_sma, "oisma")],
+)
+
+#display both Panels, sync them and pick size, use xloc
+ch = chart([pane1, pane2], sync=True, title="Title", size="l", xloc=slice("1-1-2024","1-2-2024")
+
+```
+
+## Example with markers
+
+```python
+
+#assume i want to display simple entries or exits on series or ohlcv 
+#based on tuple positions it determines entries or exits (and set colors and shape accordingly)
+pane1 = Panel(
+    ohlcv=(ohlcv_df, clean_long_entries, clean_short_entries)
+)
+ch = chart([pane1], title="Chart with Entry/Exit Markers", session=None, size="s")
+```
+<img width="798" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/0cdc3930-b8b1-40f8-af95-55467879148b">
+
+```python
+#if you want to display more entries or exits, use tuples with their colors
+
+# Create Panel with OHLC data and entry signals
+pane1 = Panel(
+    ohlcv=(data.ohlcv.get(),
+           [(clean_long_entries, "yellow"), (clean_short_entries, "pink")], #list of entries tuples with color
+           [(clean_long_exits, "yellow"), (clean_short_exits, "pink")]), #list of exits tuples with color
+)
+
+# # Create the chart with the panel
+ch = chart([pane1], title="Chart with EntryShort/ExitShort (yellow) and EntryLong/ExitLong markers (pink)", sync=True, session=None, size="s")
+```
+<img width="800" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/0acde2bf-600e-4f45-8db0-5077822d6993">
 
 
 <div align="center">
