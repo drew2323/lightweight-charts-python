@@ -79,7 +79,7 @@ pane1 = Panel(
 )
 
 # # Create the chart with the panel
-ch = chart([pane1], title="Chart with EntryShort/ExitShort (yellow) and EntryLong/ExitLong markers (pink)", sync=True, session=None, size="s")
+ch = chart([pane1], title="Chart with EntryShort/ExitShort (yellow) and EntryLong/ExitLong markers (pink)", session=None, size="s")
 ```
 <img width="800" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/0acde2bf-600e-4f45-8db0-5077822d6993">
 
