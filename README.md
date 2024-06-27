@@ -55,6 +55,35 @@ ch = chart([pane1, pane2], sync=True, title="Title", size="l", xloc=slice("1-1-2
 
 ```
 
+## Example with markers
+
+```python
+
+#assume i want to display simple entries or exits on series or ohlcv 
+#based on tuple positions it determines entries or exits (and set colors and shape accordingly)
+pane1 = Panel(
+    ohlcv=(ohlcv_df, clean_long_entries, clean_short_entries)
+)
+ch = chart([pane1], title="Chart with Entry/Exit Markers", session=None, size="s")
+```
+<img width="798" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/0cdc3930-b8b1-40f8-af95-55467879148b">
+
+```python
+#if you want to display more entries or exits, use tuples with their colors
+
+# Create Panel with OHLC data and entry signals
+pane1 = Panel(
+    ohlcv=(data.ohlcv.get(),
+           [(clean_long_entries, "yellow"), (clean_short_entries, "pink")], #list of entries tuples with color
+           [(clean_long_exits, "yellow"), (clean_short_exits, "pink")]), #list of exits tuples with color
+)
+
+# # Create the chart with the panel
+ch = chart([pane1], title="Chart with EntryShort/ExitShort (yellow) and EntryLong/ExitLong markers (pink)", sync=True, session=None, size="s")
+```
+<img width="800" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/0acde2bf-600e-4f45-8db0-5077822d6993">
+
+
 <div align="center">
     
 # lightweight-charts-python
