@@ -1,8 +1,8 @@
-Fork of original [lightweight-charts](louisnw01/lightweight-charts-python) with enhancements and supporting proprietary workflow
+Fork of original [lightweight-charts](louisnw01/lightweight-charts-python) with enhancements and supporting vectorbtpro workflow
 * colored legends
 * automatic colors if not provided
 * support for left and mid price scales
-* as inputs it supports df,pd.series or vectorbtpro indicator object (including unpacking multi outputs) for set() method
+* accepts df,pd.series or vectorbtpro indicator object (including unpacking multi outputs)
 * new markers_set method allowing to set pd.series or dataframe as markers input
 * supports simple df/sr accessors `close.lw.plot()` for quick visualization of single panel chart
 * supports `ch = chart([pane1, pane2], sync=True, title="Title", size="m")` to quickly display chart with N panes (`Panels`). Also supports syncing the Panels `sync=True` or using xloc.
