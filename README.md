@@ -10,6 +10,8 @@ Fork of original [lightweight-charts](louisnw01/lightweight-charts-python) with 
 
 <img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
 
+It should be installed directly from this repository.
+
 ## Examples
 
 ```python
