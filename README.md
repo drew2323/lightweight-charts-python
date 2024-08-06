@@ -1,6 +1,6 @@
-Fork of original [lightweight-charts](louisnw01/lightweight-charts-python) with enhancements and supporting vectorbtpro workflow
-* colored legends
-* automatic colors if not provided
+Fork of the original [lightweight-charts](louisnw01/lightweight-charts-python) with enhancements and supporting vectorbtpro workflow
+* legends cookie matching line colors
+* automatic colors picks if not provided
 * support for left and mid price scales
 * accepts df,pd.series or vectorbtpro indicator object (including unpacking multi outputs)
 * new markers_set method allowing to set pd.series or dataframe as markers input
