@@ -202,7 +202,7 @@ class SeriesCommon(Pane):
         self._set_interval(df)
         if not pd.api.types.is_datetime64_any_dtype(df['time']):
             df['time'] = pd.to_datetime(df['time'])
-        df['time'] = df['time'].astype('int64') / 10 ** 9 #removed integer divison // 10 ** 9 to keep subseconds precision
+        df['time'] = (df['time'].astype('int64') / 10 ** 6).astype(float)
 
         # if 'updated' in df.columns:
         #     df['updated'] = pd.to_datetime(df['updated']).astype('int64') / 10**9
@@ -213,7 +213,7 @@ class SeriesCommon(Pane):
             if col == 'time' or not pd.api.types.is_datetime64_any_dtype(df[col]):
                 continue
             # Convert datetime to timestamp with nanosecond precision after the decimal
-            df[col] = pd.to_datetime(df[col]).astype('int64') / 10**9
+            df[col] = (pd.to_datetime(df[col]).astype('int64') / 10**6).astype(float)
 
         return df
 
