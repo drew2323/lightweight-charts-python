@@ -118,7 +118,7 @@ class Panel:
         self.precision = precision
 
 
-def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30:00", precision=None):
+def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30:00, 09:30:05", precision=None):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized
