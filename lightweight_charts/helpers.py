@@ -59,7 +59,8 @@ class PlotSRAccessor:
     def plot(self, **kwargs):
         if "size" not in kwargs:
             kwargs["size"] = "xs"
-
+        name = kwargs["name"] if "name" in kwargs else "line"
+             
         ohlcv = ()
         right = []
         left = []
@@ -71,7 +72,7 @@ class PlotSRAccessor:
         #ohlcv is returned as it is tuple thus immutable
         ohlcv = extend_kwargs(ohlcv, right, left, middle1, middle2, histogram, kwargs)
 
-        right.append((self._obj,"line"))
+        right.append((self._obj,name))
 
         pane1 = Panel(
             ohlcv=ohlcv,
@@ -269,7 +270,7 @@ class Panel:
         self.precision = precision
 
 
-def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30:00, 09:30:05", precision=None, **kwargs):
+def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session = slice("09:30:00","9:30:05"), precision=None, **kwargs):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized
@@ -447,8 +448,21 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
             active_chart.legend(True)
             active_chart.fit()
             if session is not None and session:
-                last_used_series = output_series if is_vbt_indicator(series) else series #pokud byl posledni series vbt, pak pouzijeme jeho outputy
-                active_chart.vertical_span(start_time=xloc_me(last_used_series, xloc).vbt.xloc[session].obj.index.to_list(), color="rgba(252, 255, 187, 0.42)")
+                try:
+                    last_used_series = output_series if is_vbt_indicator(series) else series #pokud byl posledni series vbt, pak pouzijeme jeho outputy
+                    t1 = xloc_me(last_used_series, xloc)
+                    t1 = t1.vbt.xloc[session]
+                    target_data = t1.obj
+                    #we dont know the exact time of market start +- 3 seconds thus we find mark first row after 9:30
+                    # Resample the data to daily frequency and get the first entry of each day
+                    first_row_indexes = target_data.resample('D').apply(lambda x: x.index[0])
+
+                    # Convert the indexes to a list
+                    session_starts = first_row_indexes.to_list()
+
+                    active_chart.vertical_span(start_time=session_starts, color="rgba(252, 255, 187, 0.42)")
+                except Exception as e:
+                    print("Error fetching main session")
 
     if not main_title_set:
             chartX.topbar.textbox("title",title)
