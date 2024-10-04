@@ -430,7 +430,7 @@ def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session
                                     tmp.set(output_series)
                             else:
                                 if name is None:
-                                      name = "no_name"
+                                      name = "no_name" if not hasattr(series, 'name') or series.name is None else str(series.name)
 
                                 tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
                                 tmp.set(xloc_me(series, xloc))
