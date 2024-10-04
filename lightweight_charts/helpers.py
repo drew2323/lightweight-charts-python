@@ -4,15 +4,54 @@ from .util import (
 )
 import pandas as pd
 
+def append_or_extend(target_list, value):
+    if isinstance(value, list):
+        target_list.extend(value)  # Extend if it's a list
+    else:
+        target_list.append(value)  # Append if it's a single value
+
+def extend_kwargs(ohlcv, right, left, middle1, middle2, histogram, kwargs):
+    """
+    Mutate lists based on kwargs for accessor.
+    Used when user added additional series to kwargs when using accessor.
+    """
+    if 'ohlcv' in kwargs:
+        ohlcv = kwargs['ohlcv'] #ohlcv is only a tuple
+    if 'left' in kwargs:
+        append_or_extend(left, kwargs['left'])
+    if 'right' in kwargs:
+        append_or_extend(right, kwargs['right'])
+    if 'histogram' in kwargs:
+        append_or_extend(histogram, kwargs['histogram'])
+    if 'middle1' in kwargs:
+        append_or_extend(middle1, kwargs['middle1'])         
+    if 'middle2' in kwargs:
+        append_or_extend(middle1, kwargs['middle2'])   
+
+    return ohlcv #as tuple is immutable
+
 # Register the custom accessor
 @pd.api.extensions.register_series_accessor("lw")
-class PlotAccessor:
+class PlotSRAccessor:
     """
-    Custom plot accessor for pandas series.
+    Custom plot accessor for pandas series. Quickly displays series values as line on the single pane.
+
+    Also additional priceseries can be added on top of them. They can be added
+    for each scale in the correct format - either as tuple(OHLCV) or as list of tuple (others)
+
+        # input parameter / expected format:
+        #     ohlcv=(), #(series, entries, exits, other_markers)
+        #     histogram=[], # [(series, name, "rgba(53, 94, 59, 0.6)", opacity)]
+        #     right=[],
+        #     left=[], #[(series, name, entries, exits, other_markers)]
+        #     middle1=[],
+        #     middle2=[],
+
 
     Usage: s
-    series.lw.plot()
-    series.lw.plot(size="m")
+    series.lw.plot() #plot series as line
+    series.lw.plot(size="m") #on medium panesize
+    series.lw.plot(histogram=(trade_series, "trades")) #plot histogram with trades on top of that
     """
     def __init__(self, pandas_obj):
         self._obj = pandas_obj
@@ -20,10 +59,122 @@ class PlotAccessor:
     def plot(self, **kwargs):
         if "size" not in kwargs:
             kwargs["size"] = "xs"
+
+        ohlcv = ()
+        right = []
+        left = []
+        middle1 = []
+        middle2 = []
+        histogram = []
+
+        #if there are additional series in kwargs add them too
+        #ohlcv is returned as it is tuple thus immutable
+        ohlcv = extend_kwargs(ohlcv, right, left, middle1, middle2, histogram, kwargs)
+
+        right.append((self._obj,"line"))
+
         pane1 = Panel(
-            right=[(self._obj, "line")],
-        )
+            ohlcv=ohlcv,
+            histogram=histogram,
+            right=right,
+            left=left,
+            middle1=middle1,
+            middle2=middle2
+            )
+
         ch = chart([pane1], **kwargs)
+
+@pd.api.extensions.register_dataframe_accessor("lw")
+class PlotDFAccessor:
+    """
+    Custom plot accessor for dataframe. Quickly displays all columns on the single pane.
+
+    Series type is automatically extracted for each column based on following setting:
+        scale / columns
+        ohlcv = ['close', 'volume', 'open', 'high', 'low']
+        right = ['vwap']
+        left = ['rsi']
+        middle1 = []
+        middle2 = []
+        histogram = ['buyvolume', 'sellvolume', 'trades']
+
+    Also additional priceseries can be added on top of them as parameters. They can be added
+    for each scale in the correct format - either as tuple(OHLCV) or as list of tuple (others)
+
+        # input parameter / expected format:
+        #     ohlcv=(), #(series, entries, exits, other_markers)
+        #     histogram=[], # [(series, name, "rgba(53, 94, 59, 0.6)", opacity)]
+        #     right=[],
+        #     left=[], #[(series, name, entries, exits, other_markers)]
+        #     middle1=[],
+        #     middle2=[],
+
+
+    Usage:
+    ohlcv_df.lw.plot()
+    ohlcv_df.lw.plot(size="m")
+    ohlcv_df.lw.plot(right=(rsi_series, "rsi"))
+    ohlcv_df.lw.plot(right=[(rsi_series, "rsi"), (angle_series, "angle")])
+    basic_data.data[SYMBOL].lw.plot(histogram=(basic_data.data[SYMBOL].close, "close"), size="m")
+    """
+    def __init__(self, pandas_obj):
+        self._obj = pandas_obj
+
+    def plot(self, **kwargs):
+        if "size" not in kwargs:
+            kwargs["size"] = "xs"
+
+        #default settings for each pricescale
+        ohlcv_cols = ['close', 'volume', 'open', 'high', 'low']
+        right_cols = ['vwap']
+        left_cols = ['rsi']
+        middle1_cols = []
+        middle2_cols = []
+        histogram_cols = ['buyvolume', 'sellvolume', 'trades']
+        
+        ohlcv = ()
+        right = []
+        left = []
+        middle1 = []
+        middle2 = []
+        histogram = []
+
+        for col in self._obj.columns:
+             if col in right_cols:
+                  right.append((self._obj[col],col,))
+             if col in histogram_cols:
+                  histogram.append((self._obj[col],col,))
+             if col in left_cols:
+                  left.append((self._obj[col],col,))
+             if col in middle1_cols:
+                  middle1_cols.append((self._obj[col],col,))
+             if col in middle2_cols:
+                  middle2_cols.append((self._obj[col],col,))
+
+        ohlcv = (self._obj[ohlcv_cols],)
+
+        #if there are additional series in kwargs add them too
+        ohlcv = extend_kwargs(ohlcv, right, left, middle1, middle2, histogram, kwargs)
+
+        pane1 = Panel(
+            ohlcv=ohlcv,
+            histogram=histogram,
+            right=right,
+            left=left,
+            middle1=middle1,
+            middle2=middle2
+            )
+
+        ch = chart([pane1], **kwargs)
+
+        # pane1 = Panel(
+        #     ohlcv=(), #(series, entries, exits, other_markers)
+        #     histogram=[], # [(series, name, "rgba(53, 94, 59, 0.6)", opacity)]
+        #     right=[],
+        #     left=[], #[(series, name, entries, exits, other_markers)]
+        #     middle1=[],
+        #     middle2=[],
+        # )
 
 class Panel:
     """
@@ -118,7 +269,7 @@ class Panel:
         self.precision = precision
 
 
-def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30:00, 09:30:05", precision=None):
+def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session: str="9:30:00, 09:30:05", precision=None, **kwargs):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized

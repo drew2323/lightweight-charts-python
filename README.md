@@ -1,25 +1,49 @@
 Fork of the original [lightweight-charts](louisnw01/lightweight-charts-python) with enhancements and supporting vectorbtpro workflow
-* legends cookie matching line colors
-* automatic colors picks if not provided
-* support for left and mid price scales
+* legend color matching each line color
+* automatic color assignment if not provided
+* support for multiple scales (right, left, middle1, middle2, histogram)
 * accepts df,pd.series or vectorbtpro indicator object (including unpacking multi outputs)
 * new markers_set method allowing to set pd.series or dataframe as markers input
-* supports simple df/sr accessors `close.lw.plot()` for quick visualization of single panel chart
-* supports `ch = chart([pane1, pane2], sync=True, title="Title", size="m")` to quickly display chart with N panes (`Panels`). Also supports syncing the Panels `sync=True` or using xloc.
+* for quick display supports simple df/sr accessors `close.lw.plot()` for quick visualization of single panel chart
+* df accessor unpacks dataframe columns and display them accordingly (ohlcv as ohlcv, vwap on the right, rsi on the left scale etc.)
+* multipanes support `ch = chart([pane1, pane2], sync=True, title="Title", size="m")` to quickly display chart with N panes (`Panels`). Also supports syncing the Panels `sync=True` or using xloc.
   
 
 <img width="1005" alt="image" src="https://github.com/drew2323/lightweight-charts-python/assets/28433232/856c32aa-e0ff-4de0-b4a2-befc34adb571">
 
-It should be installed directly from this repository.
+## Instalation
+Directly from the repository
+
+```pip install git+https://github.com/drew2323/lightweight-charts-python.git```
 
 ## Examples
 
 ```python
-from lightweight_charts import chart, Panel
+from lightweight_charts import chart, Panel, PlotSRAccessor, PlotDFAccessor
 
 #one liner, displays close series as line on single Panel
-close.lw.plot()
-
+close_sr.lw.plot()
+```
+![alt text](image-2.png)
+```python
+close_sr.lw.plot(size="m") #on medium panesize
+close_se.lw.plot(histogram=(trade_series, "trades")) #number of trades as histogram is displayed on top of that
+```
+![alt text](image-1.png)
+```python
+#one liner to display OHLCV 
+ohlcv_df.lw.plot() #if dataframe contains other columns they are displayed too - based on standard settings (rsi-on the left, vwap - right etc.)
+```
+![alt text](image-3.png)
+```python
+ohlcv_df.lw.plot(left=[(angle_series, "angle_momentum")]) #Another line is displayed on top of OHLCV on left scale
+```
+![alt text](image-4.png)
+```python
+ohlcv_complex_df.lw.plot() #df containing ohlcv and other columns
+```
+![alt text](image-5.png)
+```python
 #quick few liner, displays close series with label "close" on right pricescale and rsi on left price scale, all on single Panel
 pane1 = Panel(
     right=[(close, "close")],
@@ -53,7 +77,7 @@ pane2 = Panel(
 )
 
 #display both Panels, sync them and pick size, use xloc
-ch = chart([pane1, pane2], sync=True, title="Title", size="l", xloc=slice("1-1-2024","1-2-2024")
+ch = chart([pane1, pane2], sync=True, title="Title", size="l", xloc=slice("1-1-2024","1-2-2024"))
 
 ```
 
@@ -88,7 +112,7 @@ ch = chart([pane1], title="Chart with EntryShort/ExitShort (yellow) and EntryLon
 
 <div align="center">
     
-# lightweight-charts-python
+# lightweight-charts-python  - forked from
 
 [![PyPi Release](https://img.shields.io/pypi/v/lightweight-charts?color=32a852&label=PyPi)](https://pypi.org/project/lightweight-charts/)
 [![Made with Python](https://img.shields.io/badge/Python-3.8+-c7a002?logo=python&logoColor=white)](https://python.org "Go to Python homepage")
