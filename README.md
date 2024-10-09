@@ -46,6 +46,13 @@ ohlcv_complex_df.lw.plot() #df containing ohlcv and other columns
 ```python
 t1data.ohlcv.data["BAC"].lw.plot(left=[(t1mom,"mom"),(t1mom_tt.mom.loc[:, (20,"1T")],),(t1mom_tt.mom.loc[:, (20,"5T")],)]) #display ohlcv 1m data along with 1min momentum ind and 2 multiindexed indicators on 1M and 5m resolution on 5M (calculated as multiindex)
 
+#quickly plot vectorbtpro indicator on top of OHLCV data (with automatic unpacking)
+macd = vbt.indicator("talib:MACD").run(t1data.data["BAC"].close) 
+t1data.ohlcv.data["BAC"].lw.plot(auto_scale=macd)
+```
+![alt text](image-6.png)
+```python
+
 #quick few liner, displays close series with label "close" on right pricescale and rsi on left price scale, all on single Panel
 pane1 = Panel(
     right=[(close, "close")],
