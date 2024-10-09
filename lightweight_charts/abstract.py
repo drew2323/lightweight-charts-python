@@ -245,9 +245,12 @@ class SeriesCommon(Pane):
         if format_cols:
             df = self._df_datetime_format(df, exclude_lowercase=self.name)
         if self.name:
-            if self.name not in df:
+            if self.name and len(df.columns) == 1: #if only one col rename it
+                df.columns = ['value']
+            elif self.name not in df:
                 raise NameError(f'No column named "{self.name}".')
-            df = df.rename(columns={self.name: 'value'})
+            else:
+                df = df.rename(columns={self.name: 'value'})
         self.data = df.copy()
         self._last_bar = df.iloc[-1]
         self.run_script(f'{self.id}.series.setData({js_data(df)}); ')
