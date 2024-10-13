@@ -53,13 +53,26 @@ t1data.ohlcv.data["BAC"].lw.plot(auto_scale=macd)
 ![alt text](image-6.png)
 ```python
 
-#quick few liner, displays close series with label "close" on right pricescale and rsi on left price scale, all on single Panel
+#ONE PANEL - quick few liner, displays close series with label "close" on right pricescale and rsi on left price scale, all on single Panel
 pane1 = Panel(
     right=[(close, "close")],
     left=[(rsi,"rsi")]
 )
 ch = chart([pane1])
 
+##ONE PANEL - quicker
+Panel(
+            auto_scale=[cdlbreakaway],
+            ohlcv=(t1data.ohlcv.data["BAC"],entries),
+            histogram=[],
+            right=[],
+            left=[],
+            middle1=[],
+            middle2=[]
+            ).chart(size="s")
+```
+![alt text](image-7.png)
+```python
 # display two Panels
 # on first displays ohlcv data, orderimbalance volume as histogram with opacity, bbands on the right pricescale and
 # sma with short_signals and short_exits on the left pricescale

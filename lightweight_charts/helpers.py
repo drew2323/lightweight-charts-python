@@ -10,7 +10,7 @@ ohlcv_cols = ['close', 'volume', 'open', 'high', 'low']
 right_cols = ['vwap']
 left_cols = ['rsi', 'cci', 'macd', 'macdsignal']
 middle1_cols = ["mom"]
-middle2_cols = ["updated"]
+middle2_cols = ["updated", "integer"]
 histogram_cols = ['buyvolume', 'sellvolume', 'trades', 'macdhist']
 
 def append_scales(df, right, histogram, left, middle1, middle2, name = ""):
@@ -246,6 +246,18 @@ class Panel:
 
     ch = chart([pane1])
 
+    # or simply:
+    
+    Panel(
+            auto_scale=[cdlbreakaway],
+            ohlcv=(t1data.ohlcv.data["BAC"],entries),
+            histogram=[],
+            right=[],
+            left=[],
+            middle1=[],
+            middle2=[]
+            ).chart(size="s")
+
     # Synced example
     pane1 = Panel(
         ohlcv=(t1data.data["BAC"],),  #(series, entries, exits, other_markers)
@@ -303,8 +315,10 @@ class Panel:
         self.xloc = xloc
         self.precision = precision
 
-
-def chart(panes: list[Panel], sync=False, title='', size="m", xloc=None, session = slice("09:30:00","9:30:05"), precision=None, **kwargs):
+    def chart(self, **kwargs):
+        chart([self], **kwargs)
+    
+def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session = slice("09:30:00","9:30:05"), precision=None, **kwargs):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized

@@ -113,7 +113,7 @@ def is_vbt_indicator(variable):
     # Get the module path of the variable's type
     module_path = variable.__class__.__module__
     # Check if it starts with 'vectorbtpro.indicators'
-    return module_path.startswith('vectorbtpro.indicators')
+    return module_path.startswith('vectorbtpro.indicators') or module_path.startswith('indicators.')
 
 class Pane:
     def __init__(self, window):
