@@ -8,7 +8,7 @@ import pandas as pd
 #default settings for each pricescale
 ohlcv_cols = ['close', 'volume', 'open', 'high', 'low']
 right_cols = ['vwap']
-left_cols = ['rsi', 'cci', 'macd', 'macdsignal']
+left_cols = ['rsi', 'cci', 'macd', 'macdsignal', "chopiness"]
 middle1_cols = ["mom"]
 middle2_cols = ["updated", "integer"]
 histogram_cols = ['buyvolume', 'sellvolume', 'trades', 'macdhist']
@@ -486,15 +486,16 @@ def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session
                                     name=output_name + " " + str(col_tuple)
                                     series_copy = output_series.loc[:, col_tuple].copy(deep=True)
                                     add_to_scale(series_copy, pane.right, pane.histogram, pane.left, pane.middle1, pane.middle2, output, name)
-                            elif isinstance(output_series, pd.DataFrame) and len(output_series.columns) > 1: #in case of multicolumns
+                            elif isinstance(output_series, pd.DataFrame): #in case of multicolumns
                                 for col in output_series.columns:
                                     name=output_name + " " + col
                                     series_copy = output_series.loc[:, col].copy(deep=True)
                                     add_to_scale(series_copy, pane.right, pane.histogram, pane.left, pane.middle1, pane.middle2, output, name)
-                            elif isinstance(output_series, pd.DataFrame) and len(output_series.columns) == 1:
-                                name=output_name + " " + output_series.columns[0]
-                                series_copy = output_series.squeeze()
-                                add_to_scale(series_copy, pane.right, pane.histogram, pane.left, pane.middle1, pane.middle2, output, name)
+                            # elif isinstance(output_series, pd.DataFrame): #it df with multiple columns (probably symbols)
+                            #     for col in output_series.columns:
+                            #         name=output_name + " " + col
+                            #         series_copy = output_series[col].squeeze()
+                            #         add_to_scale(series_copy, pane.right, pane.histogram, pane.left, pane.middle1, pane.middle2, output, name)
                             else: #add output to respective scale
                                 series_copy = output_series.copy(deep=True)
                                 add_to_scale(series_copy, pane.right, pane.histogram, pane.left, pane.middle1, pane.middle2, output, output_name)
@@ -529,6 +530,11 @@ def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session
                             kwargs = {'name': name + str(col_tuple)}
                             tmp = active_chart.create_histogram(**kwargs) #green transparent "rgba(53, 94, 59, 0.6)"
                             tmp.set(xloc_me(series.loc[:, col_tuple], xloc))
+                    elif isinstance(series, pd.DataFrame): #it df with multiple columns (probably symbols)
+                        for col in series.columns:
+                            kwargs = {'name': name + str(col)}
+                            tmp = active_chart.create_histogram(**kwargs) #green transparent "rgba(53, 94, 59, 0.6)"
+                            tmp.set(xloc_me(series[col], xloc))                      
                     else:
                         tmp = active_chart.create_histogram(**kwargs) #green transparent "rgba(53, 94, 59, 0.6)"
                         tmp.set(xloc_me(series, xloc))
@@ -555,8 +561,13 @@ def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session
                                     #if output_series is multiindex - create aline for each combination
                                     if isinstance(output_series, pd.DataFrame) and isinstance(output_series.columns, pd.MultiIndex):
                                         for col_tuple in output_series.columns:
+
                                             tmp = active_chart.create_line(name=output + " " + str(col_tuple), priceScaleId=att_name)#, color="blue")
-                                            tmp.set(output_series.loc[:, col_tuple])                                  
+                                            tmp.set(output_series.loc[:, col_tuple])
+                                    elif isinstance(output_series, pd.DataFrame): #it df with multiple columns (probably symbols)
+                                        for col in output_series.columns:
+                                            tmp = active_chart.create_line(name=output + " " + str(col), priceScaleId=att_name)#, color="blue")
+                                            tmp.set(output_series[col])                            
                                     else:  
                                         tmp = active_chart.create_line(name=output, priceScaleId=att_name)#, color="blue")
                                         tmp.set(output_series)
@@ -565,6 +576,12 @@ def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session
                                 for col_tuple in series.columns:
                                     tmp = active_chart.create_line(name=str(col_tuple) if name is None else name+" "+str(col_tuple), priceScaleId=att_name)#, color="blue")
                                     tmp.set(xloc_me(series.loc[:, col_tuple], xloc))
+                            elif isinstance(series, pd.DataFrame): #it df with multiple columns (probably symbols)
+                                for col in series.columns:
+                                    name=name + " " + col 
+                                    series_copy = output_series[col].squeeze()
+                                    tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
+                                    tmp.set(xloc_me(series_copy, xloc))
                             else:
                                 if name is None:
                                       name = "no_name" if not hasattr(series, 'name') or series.name is None else str(series.name)
