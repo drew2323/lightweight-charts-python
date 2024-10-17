@@ -8,7 +8,7 @@ import pandas as pd
 #default settings for each pricescale
 ohlcv_cols = ['close', 'volume', 'open', 'high', 'low']
 right_cols = ['vwap']
-left_cols = ['rsi', 'cci', 'macd', 'macdsignal', "chopiness"]
+left_cols = ['rsi', 'cci', 'macd', 'macdsignal', "chopiness", "chopiness_ma"]
 middle1_cols = ["mom"]
 middle2_cols = ["updated", "integer"]
 histogram_cols = ['buyvolume', 'sellvolume', 'trades', 'macdhist']
@@ -318,7 +318,7 @@ class Panel:
     def chart(self, **kwargs):
         chart([self], **kwargs)
     
-def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session = slice("09:30:00","9:30:05"), precision=None, **kwargs):
+def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session = slice("09:30:00","9:30:05"), precision=None, params_detail=False, **kwargs):
     """
     Function to fast render a chart with multiple panes. This function manipulates graphical
     output or interfaces with an external framework to display charts with synchronized
@@ -343,6 +343,8 @@ def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session
         * session (str): Draw session vertical divider at that time. Defaults to '9:30'. Can be any time in 24-hour format or xloc slice
 
         * precision (int): The number of digits after the decimal point. Defaults to None. Applies to lines on all panes, if not overriden by pane-specific precision.
+
+        * params_detail (bool): If True displays in the legend full names of multiindex columns.
 
         * xloc (str): xloc advanced filtering of vbt.xloc accessor. Defaults to None. Applies to all panes.
         Might be overriden by pane-specific xloc.
@@ -574,14 +576,51 @@ def chart(panes: list[Panel], sync=False, title='', size="s", xloc=None, session
                             #if multiindex then unpack them all with tuple as names
                             elif isinstance(series, pd.DataFrame) and isinstance(series.columns, pd.MultiIndex):
                                 for col_tuple in series.columns:
-                                    tmp = active_chart.create_line(name=str(col_tuple) if name is None else name+" "+str(col_tuple), priceScaleId=att_name)#, color="blue")
+                                    #if required show all multiindex names
+                                    if params_detail:   
+                                        # Access MultiIndex level names
+                                        index_names = series.columns.names
+                                        # Build the name string by combining level names and their corresponding values
+                                        col_name_str = " ".join([f"{index_names[i]}: {col_val}" for i, col_val in enumerate(col_tuple)])
+                                        # Use this name in the chart, adding the provided name if it exists
+                                        final_name = col_name_str if name is None else f"{name} {col_name_str}"
+                                    else:
+                                        final_name = str(col_tuple) if name is None else name+" "+str(col_tuple)
+                                    tmp = active_chart.create_line(name=final_name, priceScaleId=att_name)#, color="blue")
                                     tmp.set(xloc_me(series.loc[:, col_tuple], xloc))
                             elif isinstance(series, pd.DataFrame): #it df with multiple columns (probably symbols)
-                                for col in series.columns:
-                                    name=name + " " + col 
-                                    series_copy = output_series[col].squeeze()
-                                    tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
-                                    tmp.set(xloc_me(series_copy, xloc))
+                                
+                        #recursive df handling - but make sure it
+                                def traverse_dataframe(series, att_name, xloc, active_chart, name=""):
+                                    nonlocal tmp
+                                    # Check if the input is a DataFrame
+                                    if isinstance(series, pd.DataFrame):
+                                        for col in series.columns:
+                                            col_name = name + " " + col if name else col
+                                            # Recursively call the function for each column
+                                            traverse_dataframe(series[col], att_name, xloc, active_chart, col_name)
+                                    elif isinstance(series, pd.Series):
+                                        # Once we hit the series level, create the result_name and call the active_chart method
+                                        result_name = name.strip()  # Remove any leading/trailing spaces from column name
+                                        result_series = series.squeeze()  # Extract the series data
+
+                                        # Now call the `active_chart.create_line()` as per your requirement
+                                        tmp = active_chart.create_line(name=result_name, priceScaleId=att_name)
+                                        tmp.set(xloc_me(result_series, xloc))  # Call the xloc_me function for setting xloc
+
+                                    else:
+                                        raise ValueError(f"Unexpected type {type(series)} encountered")
+                                    
+                                if name is None:
+                                      name = "no_name" if not hasattr(series, 'name') or series.name is None else str(series.name)
+
+                                traverse_dataframe(series, att_name, xloc, active_chart, name)
+
+                                # for col in series.columns:
+                                #     name=name + " " + col 
+                                #     series_copy = output_series[col].squeeze()
+                                #     tmp = active_chart.create_line(name=name, priceScaleId=att_name)#, color="blue")
+                                #     tmp.set(xloc_me(series_copy, xloc))
                             else:
                                 if name is None:
                                       name = "no_name" if not hasattr(series, 'name') or series.name is None else str(series.name)
