@@ -649,7 +649,7 @@ class Candlestick(SeriesCommon):
         super().__init__(chart)
         self._volume_up_color = 'rgba(83,141,131,0.8)'
         self._volume_down_color = 'rgba(200,127,130,0.8)'
-
+        self.num_decimals = 2
         self.candle_data = pd.DataFrame()
 
         # self.run_script(f'{self.id}.makeCandlestickSeries()')
@@ -753,11 +753,25 @@ class Candlestick(SeriesCommon):
         text_color: Optional[str] = None,
         entire_text_only: bool = False,
         visible: bool = True,
-        ticks_visible: bool = False,
+        ticks_visible: bool = True,
         minimum_width: int = 0
     ):
+
+    # def precision(self, precision: int):
+    #     """
+    #     Sets the precision and minMove.\n
+    #     :param precision: The number of decimal places.
+    #     """
+    #     min_move = 1 / (10**precision)
+    #     self.run_script(f'''
+    #     {self.id}.series.applyOptions({{
+    #         priceFormat: {{precision: {precision}, minMove: {min_move}}}
+    #     }})''')
+    #     self.num_decimals = precision
+
         self.run_script(f'''
             {self.id}.series.priceScale().applyOptions({{
+                priceFormat: {{ precision: 3, minMove: 0.005 }},
                 autoScale: {jbool(auto_scale)},
                 mode: {as_enum(mode, PRICE_SCALE_MODE)},
                 invertScale: {jbool(invert_scale)},
@@ -988,7 +1002,7 @@ class AbstractChart(Candlestick, Pane):
 
     def legend(self, visible: bool = False, ohlc: bool = True, percent: bool = True, lines: bool = True,
                color: str = 'rgb(191, 195, 203)', font_size: int = 11, font_family: str = 'Monaco',
-               text: str = '', color_based_on_candle: bool = False):
+               text: str = '', color_based_on_candle: bool = True):
         """
         Configures the legend of the chart.
         """
