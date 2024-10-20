@@ -40,7 +40,7 @@ export class Handler {
 
     public chart: IChartApi;
     public scale: Scale;
-    public precision: number = 2;
+    public precision: number = 3;
 
     public series: ISeriesApi<SeriesType>;
     public volumeSeries: ISeriesApi<SeriesType>;
