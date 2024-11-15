@@ -1,7 +1,6 @@
 import { ISeriesApi, LineData, Logical, MouseEventParams, PriceFormatBuiltIn, SeriesType } from "lightweight-charts";
 import { Handler } from "./handler";
 
-
 interface LineElement {
     name: string;
     div: HTMLDivElement;
@@ -25,7 +24,6 @@ export class Legend {
     private candle: HTMLDivElement;
     public _lines: LineElement[] = [];
 
-
     constructor(handler: Handler) {
         this.legendHandler = this.legendHandler.bind(this)
     
@@ -42,21 +40,53 @@ export class Legend {
         this.div.style.maxHeight = '300px';
         this.div.style.overflowY = 'auto';
         this.div.style.overflowX = 'hidden';
-        this.div.style.position = 'absolute'; // Add this
-        this.div.style.backgroundColor = 'white'; // Add this
-        this.div.style.zIndex = '3'; // Add this
-        this.div.style.padding = '8px'; // Add this
-        this.div.style.display = 'none'; // This will be changed to 'block' when needed
+        this.div.style.position = 'absolute';
+        this.div.style.backgroundColor = '#131722';
+        this.div.style.color = '#D1D4DC';
+        this.div.style.padding = '12px';
+        this.div.style.borderRadius = '4px';
+        this.div.style.border = '1px solid #2A2E39';
+        this.div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+        this.div.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+        this.div.style.fontSize = '12px';
+        this.div.style.zIndex = '5';
+        this.div.style.display = 'none';
+
+        // Style the scrollbar
+        const style = document.createElement('style');
+        style.textContent = `
+            .legend::-webkit-scrollbar {
+                width: 6px;
+            }
+            .legend::-webkit-scrollbar-track {
+                background: #2A2E39;
+            }
+            .legend::-webkit-scrollbar-thumb {
+                background: #434651;
+                border-radius: 3px;
+            }
+            .legend::-webkit-scrollbar-thumb:hover {
+                background: #545861;
+            }
+            .legend-toggle-switch {
+                cursor: pointer;
+                margin-left: 8px;
+            }
+        `;
+        document.head.appendChild(style);
         
-        // Create a wrapper for the content to ensure proper scrolling
+        // Create a wrapper for the content
         this.contentWrapper = document.createElement('div');
-        this.contentWrapper.style.minHeight = '100%'; // Ensure content fills the space
+        this.contentWrapper.style.minHeight = '100%';
+        this.contentWrapper.style.width = '100%';
     
         this.text = document.createElement('span');
         this.text.style.lineHeight = '1.8';
-        this.text.style.display = 'block'; // Make span block-level
+        this.text.style.display = 'block';
+        this.text.style.color = '#D1D4DC';
         
         this.candle = document.createElement('div');
+        this.candle.style.color = '#D1D4DC';
     
         // Append in the correct order
         this.contentWrapper.appendChild(this.text);
@@ -68,14 +98,9 @@ export class Legend {
     }
 
     toJSON() {
-        // Exclude the chart attribute from serialization
         const {_lines, handler, ...serialized} = this;
         return serialized;
     }
-
-    // makeSeriesRows(handler: Handler) {
-    //     if (this.linesEnabled) handler._seriesList.forEach(s => this.makeSeriesRow(s))
-    // }
 
     makeSeriesRow(name: string, series: ISeriesApi<SeriesType>) {
         const strokeColor = series.options().color;
@@ -90,10 +115,12 @@ export class Legend {
         let row = document.createElement('div')
         row.style.display = 'flex'
         row.style.alignItems = 'center'
+        row.style.padding = '4px 0'
+        row.style.color = '#D1D4DC'
+
         let div = document.createElement('div')
         let toggle = document.createElement('div')
         toggle.classList.add('legend-toggle-switch');
-
 
         let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("width", "22");
@@ -230,7 +257,7 @@ export class Legend {
                 price = this.shorthandFormat(data.value)
             } else {
                 const format = e.series.options().priceFormat as PriceFormatBuiltIn
-                price = this.legendItemFormat(data.value, format.precision)   // couldn't this just be line.options().precision?
+                price = this.legendItemFormat(data.value, format.precision)
             }
             e.div.innerHTML = `<span style="color: ${e.solid};">▨ ${e.name} : ${price}</span>`
         })
