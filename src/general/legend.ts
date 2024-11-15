@@ -47,7 +47,7 @@ export class Legend {
         this.div.style.position = 'absolute';
         this.div.style.backgroundColor = 'rgba(19, 23, 34, 0)';
         this.div.style.color = '#D1D4DC';
-        this.div.style.padding = '8px';
+        this.div.style.padding = '1px';
         this.div.style.borderRadius = '4px';
         //this.div.style.border = '1px solid rgba(42, 46, 57, 0.85)';
         this.div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
@@ -62,7 +62,7 @@ export class Legend {
         buttonsContainer.style.right = '8px';
         buttonsContainer.style.top = '8px';
         buttonsContainer.style.display = 'flex';
-        buttonsContainer.style.gap = '8px';
+        buttonsContainer.style.gap = '2px';
         buttonsContainer.style.zIndex = '6';
         buttonsContainer.style.pointerEvents = 'all';
 
@@ -131,12 +131,12 @@ export class Legend {
         this.contentWrapper.style.width = '100%';
         this.contentWrapper.style.display = 'flex';
         this.contentWrapper.style.flexDirection = 'column';
-        this.contentWrapper.style.gap = '2px';
+        this.contentWrapper.style.gap = '1px';
         this.contentWrapper.style.marginTop = '20px';
         this.contentWrapper.style.pointerEvents = 'all';
     
         this.text = document.createElement('span');
-        this.text.style.lineHeight = '1.4';
+        this.text.style.lineHeight = '1';
         this.text.style.display = 'block';
         this.text.style.color = '#D1D4DC';
         
@@ -284,11 +284,7 @@ export class Legend {
     
         if (!param.time) {
             this.candle.style.color = 'transparent'
-            this.candle.innerHTML = this.candle.innerHTML.replace(options['upColor'], '').replace(options['downColor'], '')
-            // Hide all line indicators rows
-            this._lines.forEach(e => {
-                e.row.style.display = 'none';
-            });                      
+            this.candle.innerHTML = this.candle.innerHTML.replace(options['upColor'], '').replace(options['downColor'], '')                   
             return
         }
     
