@@ -42,6 +42,10 @@ export class Legend {
         this.div.style.maxHeight = '300px';
         this.div.style.overflowY = 'auto';
         this.div.style.overflowX = 'hidden';
+        this.div.style.position = 'absolute'; // Add this
+        this.div.style.backgroundColor = 'white'; // Add this
+        this.div.style.zIndex = '3'; // Add this
+        this.div.style.padding = '8px'; // Add this
         this.div.style.display = 'none'; // This will be changed to 'block' when needed
         
         // Create a wrapper for the content to ensure proper scrolling
@@ -119,7 +123,7 @@ export class Legend {
         toggle.appendChild(svg);
         row.appendChild(div)
         row.appendChild(toggle)
-        this.div.appendChild(row)
+        this.contentWrapper.appendChild(row)
 
         const color = series.options().color;
         this._lines.push({
