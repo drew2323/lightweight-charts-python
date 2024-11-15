@@ -107,7 +107,7 @@ export class Legend {
         this.contentWrapper.style.width = '100%';
         this.contentWrapper.style.display = 'flex';
         this.contentWrapper.style.flexDirection = 'column';
-        this.contentWrapper.style.gap = '4px';
+        this.contentWrapper.style.gap = '2px';
         this.contentWrapper.style.marginTop = '20px';
         this.contentWrapper.style.pointerEvents = 'all';
     
@@ -150,7 +150,7 @@ export class Legend {
         let row = document.createElement('div')
         row.style.display = 'flex'
         row.style.alignItems = 'center'
-        row.style.padding = '4px 0'
+        row.style.padding = '1px 0'
         row.style.color = '#D1D4DC'
         row.style.width = '100%'
         row.style.pointerEvents = 'all'
@@ -259,7 +259,7 @@ export class Legend {
         }
 
         this.candle.style.color = ''
-        let str = '<span style="line-height: 1.8;">'
+        let str = '<span style="line-height: 1.4;">'
         if (data) {
             if (this.ohlcEnabled) {
                 str += `O ${this.legendItemFormat(data.open, this.handler.precision)} `
