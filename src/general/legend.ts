@@ -14,6 +14,7 @@ interface LineElement {
 export class Legend {
     private handler: Handler;
     public div: HTMLDivElement;
+    public contentWrapper: HTMLDivElement;
 
     private ohlcEnabled: boolean = false;
     private percentEnabled: boolean = false;
@@ -27,37 +28,38 @@ export class Legend {
 
     constructor(handler: Handler) {
         this.legendHandler = this.legendHandler.bind(this)
-
+    
         this.handler = handler;
         this.ohlcEnabled = false;
         this.percentEnabled = false
         this.linesEnabled = false
         this.colorBasedOnCandle = false
-
+    
+        // Create container div
         this.div = document.createElement('div');
         this.div.classList.add('legend');
-        this.div.style.maxWidth = `${(handler.scale.width * 100) - 8}vw`
-        // Important: Set these styles to make it scrollable
-        this.div.style.height = '300px'; // Fixed height instead of maxHeight
+        this.div.style.maxWidth = `${(handler.scale.width * 100) - 8}vw`;
+        this.div.style.maxHeight = '300px';
         this.div.style.overflowY = 'auto';
-        this.div.style.display = 'block'; // Ensure it's a block element
-        this.div.style.position = 'relative'; // Helps with positioning
-
-        // Optional: Add some styling for better appearance
-        this.div.style.border = '1px solid #ccc';
-        this.div.style.padding = '10px';
-        this.div.style.display = 'none';
-
-        this.text = document.createElement('span')
-        this.text.style.lineHeight = '1.8'
-        this.candle = document.createElement('div')
-
-        this.div.appendChild(this.text)
-        this.div.appendChild(this.candle)
-        handler.div.appendChild(this.div)
-
-        // this.makeSeriesRows(handler);
-
+        this.div.style.overflowX = 'hidden';
+        this.div.style.display = 'none'; // This will be changed to 'block' when needed
+        
+        // Create a wrapper for the content to ensure proper scrolling
+        this.contentWrapper = document.createElement('div');
+        this.contentWrapper.style.minHeight = '100%'; // Ensure content fills the space
+    
+        this.text = document.createElement('span');
+        this.text.style.lineHeight = '1.8';
+        this.text.style.display = 'block'; // Make span block-level
+        
+        this.candle = document.createElement('div');
+    
+        // Append in the correct order
+        this.contentWrapper.appendChild(this.text);
+        this.contentWrapper.appendChild(this.candle);
+        this.div.appendChild(this.contentWrapper);
+        handler.div.appendChild(this.div);
+    
         handler.chart.subscribeCrosshairMove(this.legendHandler)
     }
 
