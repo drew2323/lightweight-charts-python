@@ -44,7 +44,7 @@ export class Legend {
         this.div.style.overflowY = 'auto';
         this.div.style.overflowX = 'hidden';
         this.div.style.position = 'absolute';
-        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.85)';
+        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.1)';
         this.div.style.color = '#D1D4DC';
         this.div.style.padding = '12px';
         this.div.style.borderRadius = '4px';
