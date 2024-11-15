@@ -48,7 +48,7 @@ export class Legend {
         this.div.style.color = '#D1D4DC';
         this.div.style.padding = '12px';
         this.div.style.borderRadius = '4px';
-        this.div.style.border = '1px solid rgba(42, 46, 57, 0.85)';
+        //this.div.style.border = '1px solid rgba(42, 46, 57, 0.85)';
         this.div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
         this.div.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
         this.div.style.fontSize = '12px';
@@ -112,7 +112,7 @@ export class Legend {
         this.contentWrapper.style.pointerEvents = 'all';
     
         this.text = document.createElement('span');
-        this.text.style.lineHeight = '1.8';
+        this.text.style.lineHeight = '1';
         this.text.style.display = 'block';
         this.text.style.color = '#D1D4DC';
         this.text.style.pointerEvents = 'all';
