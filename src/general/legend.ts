@@ -213,7 +213,7 @@ export class Legend {
         let row = document.createElement('div')
         row.style.display = 'flex'
         row.style.alignItems = 'center'
-        row.style.padding = '1px 0'
+        row.style.padding = '0px 0'
         row.style.color = '#D1D4DC'
         row.style.width = '100%'
         row.style.pointerEvents = 'all'
@@ -285,6 +285,10 @@ export class Legend {
         if (!param.time) {
             this.candle.style.color = 'transparent'
             this.candle.innerHTML = this.candle.innerHTML.replace(options['upColor'], '').replace(options['downColor'], '')
+            // Add this to clear line indicators:
+            this._lines.forEach(e => {
+                e.div.innerHTML = `<span style="color: ${e.solid};">▨ ${e.name} : --</span>`
+            });                        
             return
         }
     
@@ -304,7 +308,7 @@ export class Legend {
         }
     
         this.candle.style.color = ''
-        let str = '<span style="line-height: 1.4;">'
+        let str = '<span style="line-height: 1.0;">'
         if (data) {
             if (this.ohlcEnabled) {
                 str += `O ${this.legendItemFormat(data.open, this.handler.precision)} `
