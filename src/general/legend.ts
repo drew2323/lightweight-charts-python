@@ -37,9 +37,15 @@ export class Legend {
         this.div = document.createElement('div');
         this.div.classList.add('legend');
         this.div.style.maxWidth = `${(handler.scale.width * 100) - 8}vw`
-        this.div.style.maxHeight = '300px'; // Set a maximum height
-        this.div.style.overflowY = 'auto'; // Enable vertical scrolling
-        this.div.style.overflowX = 'hidden'; // Prevent horizontal scrolling
+        // Important: Set these styles to make it scrollable
+        this.div.style.height = '300px'; // Fixed height instead of maxHeight
+        this.div.style.overflowY = 'auto';
+        this.div.style.display = 'block'; // Ensure it's a block element
+        this.div.style.position = 'relative'; // Helps with positioning
+
+        // Optional: Add some styling for better appearance
+        this.div.style.border = '1px solid #ccc';
+        this.div.style.padding = '10px';
         this.div.style.display = 'none';
 
         this.text = document.createElement('span')
