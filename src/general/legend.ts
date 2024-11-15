@@ -285,10 +285,10 @@ export class Legend {
         if (!param.time) {
             this.candle.style.color = 'transparent'
             this.candle.innerHTML = this.candle.innerHTML.replace(options['upColor'], '').replace(options['downColor'], '')
-            // Add this to clear line indicators:
+            // Hide all line indicators rows
             this._lines.forEach(e => {
-                e.div.innerHTML = `<span style="color: ${e.solid};">▨ ${e.name} : --</span>`
-            });                        
+                e.row.style.display = 'none';
+            });                      
             return
         }
     
