@@ -158,12 +158,13 @@ export class Legend {
         
         if (this.isCollapsed) {
             this.contentWrapper.style.display = 'none';
-            this.div.style.maxHeight = 'auto';
-            this.div.style.height = 'auto';
+            this.div.style.maxHeight = '40px'; // Changed from 'auto' to fixed height for buttons
+            this.div.style.height = '40px';    // Added fixed height
             this.collapseButton.innerHTML = '+';
         } else {
             this.contentWrapper.style.display = 'flex';
             this.div.style.maxHeight = '300px';
+            this.div.style.height = 'auto';    // Reset height to auto
             this.collapseButton.innerHTML = '−';
         }
     }
