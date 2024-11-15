@@ -79,6 +79,8 @@ export class Legend {
         this.contentWrapper = document.createElement('div');
         this.contentWrapper.style.minHeight = '100%';
         this.contentWrapper.style.width = '100%';
+        this.contentWrapper.style.display = 'flex';
+        this.contentWrapper.style.flexDirection = 'column'
     
         this.text = document.createElement('span');
         this.text.style.lineHeight = '1.8';
@@ -115,6 +117,8 @@ export class Legend {
         let row = document.createElement('div')
         row.style.display = 'flex'
         row.style.alignItems = 'center'
+        row.style.width = '100%'  // Key fix - make row take full width
+        row.style.justifyContent = 'space-between'  // Spread content across the full width
         row.style.padding = '4px 0'
         row.style.color = '#D1D4DC'
 
