@@ -38,13 +38,13 @@ export class Legend {
         // Create container div
         this.div = document.createElement('div');
         this.div.classList.add('legend');
-        this.div.style.maxWidth = '300px'; // Fixed width instead of percentage
-        this.div.style.minWidth = '200px'; // Add minimum width to ensure readability
+        this.div.style.maxWidth = '300px';
+        this.div.style.minWidth = '200px';
         this.div.style.maxHeight = '300px';
         this.div.style.overflowY = 'auto';
         this.div.style.overflowX = 'hidden';
         this.div.style.position = 'absolute';
-        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.60)';
+        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.85)';
         this.div.style.color = '#D1D4DC';
         this.div.style.padding = '12px';
         this.div.style.borderRadius = '4px';
@@ -54,6 +54,7 @@ export class Legend {
         this.div.style.fontSize = '12px';
         this.div.style.zIndex = '5';
         this.div.style.display = 'none';
+        this.div.style.pointerEvents = 'all';
 
         // Create collapse button
         this.collapseButton = document.createElement('div');
@@ -69,8 +70,13 @@ export class Legend {
         this.collapseButton.style.color = '#D1D4DC';
         this.collapseButton.style.fontSize = '16px';
         this.collapseButton.style.userSelect = 'none';
-        this.collapseButton.innerHTML = '−'; // Minus sign for collapse
-        this.collapseButton.addEventListener('click', () => this.toggleCollapse());
+        this.collapseButton.style.zIndex = '6';
+        this.collapseButton.style.pointerEvents = 'all';
+        this.collapseButton.innerHTML = '−';
+        this.collapseButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleCollapse();
+        });
         
         // Style the scrollbar
         const style = document.createElement('style');
@@ -102,16 +108,19 @@ export class Legend {
         this.contentWrapper.style.display = 'flex';
         this.contentWrapper.style.flexDirection = 'column';
         this.contentWrapper.style.gap = '4px';
-        this.contentWrapper.style.marginTop = '20px'; // Add space for collapse button
+        this.contentWrapper.style.marginTop = '20px';
+        this.contentWrapper.style.pointerEvents = 'all';
     
         this.text = document.createElement('span');
         this.text.style.lineHeight = '1.8';
         this.text.style.display = 'block';
         this.text.style.color = '#D1D4DC';
+        this.text.style.pointerEvents = 'all';
         
         this.candle = document.createElement('div');
         this.candle.style.color = '#D1D4DC';
         this.candle.style.width = '100%';
+        this.candle.style.pointerEvents = 'all';
     
         // Append in the correct order
         this.contentWrapper.appendChild(this.text);
@@ -121,23 +130,6 @@ export class Legend {
         handler.div.appendChild(this.div);
     
         handler.chart.subscribeCrosshairMove(this.legendHandler)
-    }
-
-    private toggleCollapse() {
-        this.isCollapsed = !this.isCollapsed;
-        
-        if (this.isCollapsed) {
-            // Collapse
-            this.contentWrapper.style.display = 'none';
-            this.div.style.maxHeight = 'auto';
-            this.div.style.height = 'auto';
-            this.collapseButton.innerHTML = '+'; // Plus sign for expand
-        } else {
-            // Expand
-            this.contentWrapper.style.display = 'flex';
-            this.div.style.maxHeight = '300px';
-            this.collapseButton.innerHTML = '−'; // Minus sign for collapse
-        }
     }
 
     toJSON() {
@@ -158,18 +150,24 @@ export class Legend {
         let row = document.createElement('div')
         row.style.display = 'flex'
         row.style.alignItems = 'center'
-        row.style.width = '100%'  // Key fix - make row take full width
-        row.style.justifyContent = 'space-between'  // Spread content across the full width
         row.style.padding = '4px 0'
         row.style.color = '#D1D4DC'
+        row.style.width = '100%'
+        row.style.pointerEvents = 'all'
+        row.style.cursor = 'default'
 
         let div = document.createElement('div')
+        div.style.flex = '1'
+        div.style.pointerEvents = 'all'
+
         let toggle = document.createElement('div')
         toggle.classList.add('legend-toggle-switch');
+        toggle.style.pointerEvents = 'all'
 
         let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("width", "22");
         svg.setAttribute("height", "16");
+        svg.style.pointerEvents = 'all'
 
         let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         group.innerHTML = openEye
@@ -206,6 +204,21 @@ export class Legend {
             series: series,
             solid: color.startsWith('rgba') ? color.replace(/[^,]+(?=\))/, '1') : color
         });
+    }
+
+    private toggleCollapse() {
+        this.isCollapsed = !this.isCollapsed;
+        
+        if (this.isCollapsed) {
+            this.contentWrapper.style.display = 'none';
+            this.div.style.maxHeight = 'auto';
+            this.div.style.height = 'auto';
+            this.collapseButton.innerHTML = '+';
+        } else {
+            this.contentWrapper.style.display = 'flex';
+            this.div.style.maxHeight = '300px';
+            this.collapseButton.innerHTML = '−';
+        }
     }
 
     legendItemFormat(num: number, decimal: number) { return num.toFixed(decimal).toString().padStart(8, ' ') }
