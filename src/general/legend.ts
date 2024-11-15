@@ -45,11 +45,11 @@ export class Legend {
         this.div.style.overflowY = 'auto';
         this.div.style.overflowX = 'hidden';
         this.div.style.position = 'absolute';
-        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.85)';
+        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0)';
         this.div.style.color = '#D1D4DC';
         this.div.style.padding = '8px';
         this.div.style.borderRadius = '4px';
-        this.div.style.border = '1px solid rgba(42, 46, 57, 0.85)';
+        //this.div.style.border = '1px solid rgba(42, 46, 57, 0.85)';
         this.div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
         this.div.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
         this.div.style.fontSize = '12px';
