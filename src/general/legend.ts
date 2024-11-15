@@ -14,6 +14,8 @@ export class Legend {
     private handler: Handler;
     public div: HTMLDivElement;
     public contentWrapper: HTMLDivElement;
+    private collapseButton: HTMLDivElement;
+    private isCollapsed: boolean = false;
 
     private ohlcEnabled: boolean = false;
     private percentEnabled: boolean = false;
@@ -41,17 +43,35 @@ export class Legend {
         this.div.style.overflowY = 'auto';
         this.div.style.overflowX = 'hidden';
         this.div.style.position = 'absolute';
-        this.div.style.backgroundColor = '#131722';
+        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.85)';
         this.div.style.color = '#D1D4DC';
         this.div.style.padding = '12px';
         this.div.style.borderRadius = '4px';
-        this.div.style.border = '1px solid #2A2E39';
+        this.div.style.border = '1px solid rgba(42, 46, 57, 0.85)';
         this.div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
         this.div.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
         this.div.style.fontSize = '12px';
         this.div.style.zIndex = '5';
         this.div.style.display = 'none';
+        this.div.style.width = '100%';
 
+        // Create collapse button
+        this.collapseButton = document.createElement('div');
+        this.collapseButton.style.position = 'absolute';
+        this.collapseButton.style.right = '8px';
+        this.collapseButton.style.top = '8px';
+        this.collapseButton.style.cursor = 'pointer';
+        this.collapseButton.style.width = '20px';
+        this.collapseButton.style.height = '20px';
+        this.collapseButton.style.display = 'flex';
+        this.collapseButton.style.alignItems = 'center';
+        this.collapseButton.style.justifyContent = 'center';
+        this.collapseButton.style.color = '#D1D4DC';
+        this.collapseButton.style.fontSize = '16px';
+        this.collapseButton.style.userSelect = 'none';
+        this.collapseButton.innerHTML = '−'; // Minus sign for collapse
+        this.collapseButton.addEventListener('click', () => this.toggleCollapse());
+        
         // Style the scrollbar
         const style = document.createElement('style');
         style.textContent = `
@@ -80,7 +100,9 @@ export class Legend {
         this.contentWrapper.style.minHeight = '100%';
         this.contentWrapper.style.width = '100%';
         this.contentWrapper.style.display = 'flex';
-        this.contentWrapper.style.flexDirection = 'column'
+        this.contentWrapper.style.flexDirection = 'column';
+        this.contentWrapper.style.gap = '4px';
+        this.contentWrapper.style.marginTop = '20px'; // Add space for collapse button
     
         this.text = document.createElement('span');
         this.text.style.lineHeight = '1.8';
@@ -89,14 +111,33 @@ export class Legend {
         
         this.candle = document.createElement('div');
         this.candle.style.color = '#D1D4DC';
+        this.candle.style.width = '100%';
     
         // Append in the correct order
         this.contentWrapper.appendChild(this.text);
         this.contentWrapper.appendChild(this.candle);
+        this.div.appendChild(this.collapseButton);
         this.div.appendChild(this.contentWrapper);
         handler.div.appendChild(this.div);
     
         handler.chart.subscribeCrosshairMove(this.legendHandler)
+    }
+
+    private toggleCollapse() {
+        this.isCollapsed = !this.isCollapsed;
+        
+        if (this.isCollapsed) {
+            // Collapse
+            this.contentWrapper.style.display = 'none';
+            this.div.style.maxHeight = 'auto';
+            this.div.style.height = 'auto';
+            this.collapseButton.innerHTML = '+'; // Plus sign for expand
+        } else {
+            // Expand
+            this.contentWrapper.style.display = 'flex';
+            this.div.style.maxHeight = '300px';
+            this.collapseButton.innerHTML = '−'; // Minus sign for collapse
+        }
     }
 
     toJSON() {
