@@ -38,12 +38,13 @@ export class Legend {
         // Create container div
         this.div = document.createElement('div');
         this.div.classList.add('legend');
-        this.div.style.maxWidth = `${(handler.scale.width * 100) - 8}vw`;
+        this.div.style.maxWidth = '300px'; // Fixed width instead of percentage
+        this.div.style.minWidth = '200px'; // Add minimum width to ensure readability
         this.div.style.maxHeight = '300px';
         this.div.style.overflowY = 'auto';
         this.div.style.overflowX = 'hidden';
         this.div.style.position = 'absolute';
-        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.85)';
+        this.div.style.backgroundColor = 'rgba(19, 23, 34, 0.60)';
         this.div.style.color = '#D1D4DC';
         this.div.style.padding = '12px';
         this.div.style.borderRadius = '4px';
@@ -53,7 +54,6 @@ export class Legend {
         this.div.style.fontSize = '12px';
         this.div.style.zIndex = '5';
         this.div.style.display = 'none';
-        this.div.style.width = '100%';
 
         // Create collapse button
         this.collapseButton = document.createElement('div');
