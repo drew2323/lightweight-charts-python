@@ -354,7 +354,7 @@ export class Legend {
             else {
                 data = param.seriesData.get(e.series) as LineData
             }
-            if (!data?.value) return;
+            if (data === undefined || data.value === undefined) return;
             let price;
             if (e.series.seriesType() == 'Histogram') {
                 price = this.shorthandFormat(data.value)
